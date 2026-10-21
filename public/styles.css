@@ -288,3 +288,4 @@ main { padding-bottom: 8px; }
   .tabelle .nur-gross, .tabelle th:last-child.nur-gross { display: none; }
   .reiter > button, .reiter-gruppe button { font-size: 0.66rem; }
 }
+.stand-info { color: var(--text-leise); font-weight: 400; }

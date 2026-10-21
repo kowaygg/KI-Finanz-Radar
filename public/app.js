@@ -181,6 +181,8 @@ function standAnzeigen(status) {
   const alterMs = Date.now() - Date.parse(status.letzterAbruf);
   const minuten = Math.max(0, Math.round(alterMs / 60000));
   stand.textContent = minuten < 60 ? `Stand: vor ${minuten} Min.` : `Stand: vor ${Math.floor(minuten / 60)} Std. ${minuten % 60} Min.`;
+  // Hinweis zum Rhythmus: geplant alle 15 Min., GitHub startet kostenlose Abrufe oft verzögert.
+  stand.append(element('span', 'stand-info', ' · neue Daten automatisch etwa alle 15–45 Min.'));
   const alt = alterMs > ALARM_NACH_MS;
   stand.classList.toggle('alt', alt);
   warnung.hidden = !alt;
