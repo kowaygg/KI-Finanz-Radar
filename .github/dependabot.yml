@@ -1,0 +1,7 @@
+# Meldet veraltete oder unsichere GitHub Actions (einmal pro Monat, Sicherheitswarnungen sofort).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

@@ -1,0 +1,68 @@
+# Holt alle 15 Minuten die News, lässt sie von der KI bewerten und veröffentlicht die App auf GitHub Pages.
+# Der Arbeitsstand (data/zustand.json) liegt im Actions-Cache – nicht im Repo (Repo bleibt klein, Teaser bleiben privat).
+name: Abruf
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: abruf
+  cancel-in-progress: false
+
+jobs:
+  abruf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.veroeffentlichen.outputs.page_url }}
+    steps:
+      - name: Code holen
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.22.0"
+
+      - name: Letzten Arbeitsstand laden
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data
+          key: zustand-${{ github.run_id }}
+          restore-keys: zustand-
+
+      - name: News abrufen und bewerten
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: npm run abruf
+
+      - name: Arbeitsstand sichern
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data
+          key: zustand-${{ github.run_id }}
+
+      - name: App-Dateien bündeln
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: public
+
+      - name: Auf GitHub Pages veröffentlichen
+        id: veroeffentlichen
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

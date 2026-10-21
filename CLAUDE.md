@@ -232,7 +232,8 @@ VORGEHEN
 - Alle Rückfragen vom 21.10.2026 beantwortet
 - 21.10.2026 (M2): KI in zwei Stufen (Bewertung 25/Anfrage, Analyse ab Relevanz 7, 5/Anfrage, max. 4+4 Anfragen pro Lauf). Fehler pro Modell: 429/404/503 → nächstes Modell desselben Dienstes, 401/403 → nächster Dienst. KI vergibt Ereignis-Kürzel → gleiche Ereignisse (auch sprachübergreifend) in „Wichtig“ zusammengefasst. Clickbait/Gerüchte max. Relevanz 3. Prompt verlangt Strenge (~10 % ≥ 7, PR max. 6). Modelle 21.10.2026 per ki-check bestätigt: gemini-3.8-flash, gemini-3.5-flash-lite, gemini-2.5-flash
 - 21.10.2026 (M1): Nur Meldungen der letzten 48 h aufnehmen; Teaser nur intern als KI-Eingabe, nie veröffentlicht/angezeigt; Service Worker holt alles zuerst aus dem Netz (Offline-Fallback)
-- 21.10.2026: Meldungsdaten nicht in die Hauptgeschichte committen, sondern in einen eigenen Daten-Zweig (regelmäßig zusammengefasst) → Repo bleibt klein
+- 21.10.2026 (M3, ersetzt Daten-Zweig-Idee): Arbeitsstand `data/zustand.json` liegt im GitHub-Actions-Cache (neuer Schlüssel pro Lauf, Wiederherstellung über Präfix) – keine Daten-Commits, Repo bleibt klein, Teaser nicht öffentlich. Geht der Cache verloren, werden die letzten 48 h neu geholt und neu bewertet.
+- 21.10.2026 (M3): Actions auf Commit-SHA gepinnt (checkout v7.0.1, setup-node v7.0.0 – v7.1.0 war erst 2 Wochen alt –, cache v6.1.0, upload-pages-artifact v5.0.0, deploy-pages v5.0.1), Node 24.22.0, minimale Rechte, persist-credentials: false
 
 ### Aufbau
 - `CLAUDE.md` – diese Datei
@@ -248,6 +249,8 @@ VORGEHEN
 - `src/ki/` – `anweisungen.js` (feste Prompts, Daten-JSON), `pruefen.js` (strenge Prüfung), `kette.js` (Ausweichkette), `analyse.js` (Bewertung → Ereignis-Zusammenfassung → Analyse)
 - `.env` (lokal, ignoriert) / `.env.beispiel` – API-Schlüssel
 - `tests/` – `npm test` (Node-Testrunner)
+- `.github/workflows/abruf.yml` – alle 15 Min.: Cache laden → `npm run abruf` (Secrets als Umgebungsvariablen) → Cache sichern → `public/` auf GitHub Pages
+- `.github/workflows/tests.yml` – Tests bei jedem Push; `.github/dependabot.yml` – Actions-Updates monatlich
 - Erzeugt, nicht im Repo: `data/zustand.json` (mit Teaser für KI), `public/data/meldungen.json` + `status.json` (öffentlich, ohne Teaser)
 
 ### Befehle
