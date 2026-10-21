@@ -1,6 +1,6 @@
 {
   "_anleitung": "Zentrale Einstellungen. Jeder Wert ist nur hier eingestellt.",
-  "userAgent": "KI-Finanz-Radar/0.6 (privater News-Leser; https://github.com/kowaygg/KI-Finanz-Radar)",
+  "userAgent": "KI-Finanz-Radar/0.7 (privater News-Leser; https://github.com/kowaygg/KI-Finanz-Radar)",
   "abrufTimeoutSekunden": 15,
   "pauseZwischenQuellenMs": 1000,
   "maxMeldungenProQuelle": 30,
