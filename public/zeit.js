@@ -55,14 +55,22 @@ function handelstag(boerse, datumText) {
   return wochentag !== 0 && wochentag !== 6 && !(boerse.feiertage || []).includes(datumText);
 }
 
-// Ergebnis: { offen: true, schliesst: Date } oder { offen: false, oeffnet: Date, grund }
+// Ergebnis: { offen: true, schliesst: Date, mittagspause? } oder { offen: false, oeffnet: Date, mittagspause?, feiertag? }
+// Börsen mit Mittagspause (z. B. Tokio, Shanghai, Hongkong) haben 'pause': { "von": "11:30", "bis": "12:30" }.
 export function boersenStatus(boerse, jetzt = new Date()) {
   const heute = wandzeit(jetzt, boerse.zeitzone).datum;
   if (handelstag(boerse, heute)) {
-    const auf = zeitpunktInZone(heute, boerse.oeffnung, boerse.zeitzone);
-    const zu = zeitpunktInZone(heute, boerse.fruehschluss?.[heute] || boerse.schluss, boerse.zeitzone);
-    if (jetzt >= auf && jetzt < zu) return { offen: true, schliesst: zu, fruehschluss: Boolean(boerse.fruehschluss?.[heute]) };
+    const z = (uhr) => zeitpunktInZone(heute, uhr, boerse.zeitzone);
+    const auf = z(boerse.oeffnung);
+    const zu = z(boerse.fruehschluss?.[heute] || boerse.schluss);
+    const fruehschluss = Boolean(boerse.fruehschluss?.[heute]);
+    const pauseVon = boerse.pause ? z(boerse.pause.von) : null;
+    const pauseBis = boerse.pause ? z(boerse.pause.bis) : null;
+    const mitPause = pauseVon && pauseBis && zu > pauseVon;
     if (jetzt < auf) return { offen: false, oeffnet: auf };
+    if (mitPause && jetzt < pauseVon) return { offen: true, schliesst: pauseVon, mittagspause: true };
+    if (mitPause && jetzt < pauseBis && zu > pauseBis) return { offen: false, oeffnet: pauseBis, mittagspause: true };
+    if (jetzt < zu) return { offen: true, schliesst: zu, fruehschluss };
   }
   for (let i = 1; i <= 10; i++) {
     const tag = tagPlus(heute, i);

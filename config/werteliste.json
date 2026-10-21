@@ -112,6 +112,7 @@
     { "name": "Vanguard FTSE All-World (thesaurierend)", "isin": "IE00BK5BQT80", "symbol": "VWCE.DE", "art": "ETF" },
     { "name": "Vanguard FTSE All-World (ausschüttend)", "isin": "IE00B3RBWM25", "symbol": "VGWL.DE", "art": "ETF" },
     { "name": "iShares Core MSCI EM IMI", "isin": "IE00BKM4GZ66", "symbol": "IS3N.DE", "art": "ETF" },
+    { "name": "iShares MSCI EM", "isin": "IE00B4L5YC18", "symbol": "EUNM.DE", "art": "ETF" },
     { "name": "iShares Core S&P 500", "isin": "IE00B5BMR087", "symbol": "SXR8.DE", "art": "ETF" },
     { "name": "Vanguard S&P 500 (thesaurierend)", "isin": "IE00BFMXXD54", "symbol": "VUAA.DE", "art": "ETF" },
     { "name": "Xtrackers MSCI World 1C", "isin": "IE00BJ0KDQ92", "symbol": "XDWD.DE", "art": "ETF" },

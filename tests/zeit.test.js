@@ -53,3 +53,25 @@ test('Countdown, Termintext und Wettersymbol', () => {
   assert.equal(wetterSymbol(0, true)[1], 'klar');
   assert.equal(wetterSymbol(63)[1], 'Regen');
 });
+
+test('Mittagspause (Tokio) und Frühschluss vor der Pause (Hongkong)', () => {
+  const tokio = { zeitzone: 'Asia/Tokyo', oeffnung: '09:00', schluss: '15:30', pause: { von: '11:30', bis: '12:30' }, feiertage: [], fruehschluss: {} };
+  // 22.10.2026: 10:00 Tokio = 01:00 UTC
+  const vormittag = boersenStatus(tokio, new Date('2026-10-22T01:00:00Z'));
+  assert.equal(vormittag.offen, true);
+  assert.equal(vormittag.mittagspause, true);
+  assert.equal(vormittag.schliesst.toISOString(), '2026-10-22T02:30:00.000Z');
+  const pause = boersenStatus(tokio, new Date('2026-10-22T03:00:00Z'));
+  assert.equal(pause.offen, false);
+  assert.equal(pause.mittagspause, true);
+  assert.equal(pause.oeffnet.toISOString(), '2026-10-22T03:30:00.000Z');
+  const nachmittag = boersenStatus(tokio, new Date('2026-10-22T05:00:00Z'));
+  assert.equal(nachmittag.schliesst.toISOString(), '2026-10-22T06:30:00.000Z');
+  const hk = { zeitzone: 'Asia/Hong_Kong', oeffnung: '09:30', schluss: '16:00', pause: { von: '12:00', bis: '13:00' }, feiertage: [], fruehschluss: { '2026-12-31': '12:00' } };
+  const silvester = boersenStatus(hk, new Date('2026-12-31T03:00:00Z'));
+  assert.equal(silvester.offen, true);
+  assert.equal(silvester.schliesst.toISOString(), '2026-12-31T04:00:00.000Z');
+  const danach = boersenStatus(hk, new Date('2026-12-31T05:30:00Z'));
+  assert.equal(danach.offen, false);
+  assert.equal(danach.oeffnet.toISOString(), '2027-01-01T01:30:00.000Z');
+});

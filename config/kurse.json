@@ -15,5 +15,13 @@
     { "schluessel": "1J", "name": "1 Jahr", "range": "1y", "interval": "1d" },
     { "schluessel": "Max", "name": "Maximal", "range": "max", "interval": "1mo" }
   ],
-  "maxPunkte": 260
+  "maxPunkte": 260,
+  "_werteZeitraeume": "Verläufe für ALLE Werte der Werteliste (Reiter „Kurse“). 'minuten' = wie oft neu geholt wird (0 = bei jedem Abruf), damit nicht unnötig viele Anfragen entstehen.",
+  "werteZeitraeume": [
+    { "schluessel": "1T", "range": "1d", "interval": "5m", "minuten": 0 },
+    { "schluessel": "1W", "range": "5d", "interval": "30m", "minuten": 60 },
+    { "schluessel": "1M", "range": "1mo", "interval": "1d", "minuten": 180 },
+    { "schluessel": "1J", "range": "1y", "interval": "1wk", "minuten": 1440 },
+    { "schluessel": "Max", "range": "max", "interval": "1mo", "minuten": 1440 }
+  ]
 }

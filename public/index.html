@@ -27,7 +27,6 @@
       <span class="trenner">·</span>
       <time id="uhr" class="uhr"></time>
     </div>
-    <div class="kopf-boersen" id="boersen"></div>
     <div class="kopf-zeile klein">
       <span id="stand" class="stand"></span>
       <span id="kopf-wichtig" class="kopf-wichtig" hidden></span>
@@ -42,7 +41,6 @@
       </dl>
     </details>
     <p id="warnung" class="warnung" hidden></p>
-    <section id="maerkte" class="maerkte" aria-label="Kursverlauf DAX und S&amp;P 500" hidden></section>
     <section id="top-news" class="top-news" aria-labelledby="top-titel" hidden>
       <h2 id="top-titel">Top-News der letzten 24 Stunden</h2>
       <ol id="top-liste" class="top-liste"></ol>
@@ -53,6 +51,8 @@
     <button role="tab" id="tab-ticker" aria-controls="ansicht-ticker" aria-selected="true">Live-Ticker <span id="zaehler-ticker" class="zaehler" hidden></span></button>
     <button role="tab" id="tab-wichtig" aria-controls="ansicht-wichtig" aria-selected="false">Wichtig <span id="zaehler-wichtig" class="zaehler" hidden></span></button>
     <button role="tab" id="tab-watchlist" aria-controls="ansicht-watchlist" aria-selected="false">Watchlist <span id="zaehler-watchlist" class="zaehler warn" hidden></span></button>
+    <button role="tab" id="tab-kurse" aria-controls="ansicht-kurse" aria-selected="false">Kurse</button>
+    <button role="tab" id="tab-boersen" aria-controls="ansicht-boersen" aria-selected="false">Börsen <span id="zaehler-boersen" class="zaehler" hidden></span></button>
   </nav>
 
   <main>
@@ -80,6 +80,18 @@
         </div>
         <p id="watchlist-meldung" class="klein-hinweis" role="status"></p>
       </details>
+    </section>
+    <section id="ansicht-kurse" role="tabpanel" aria-labelledby="tab-kurse" hidden>
+      <h2 class="abschnitt">Indizes</h2>
+      <div id="maerkte" class="maerkte" aria-label="Kursverlauf DAX und S&amp;P 500"></div>
+      <h2 class="abschnitt">Deine Watchlist</h2>
+      <div id="kurse-watchlist" class="maerkte"></div>
+      <p id="kurse-watchlist-leer" class="leer" hidden>Hier erscheinen die Kurven deiner Watchlist-Werte – Werte im Reiter „Watchlist“ eintragen.</p>
+      <p id="kurse-ohne-daten" class="klein-hinweis" hidden></p>
+    </section>
+    <section id="ansicht-boersen" role="tabpanel" aria-labelledby="tab-boersen" hidden>
+      <div id="boersen" class="boersen-tafel"></div>
+      <p id="boersen-hinweis" class="klein-hinweis"></p>
     </section>
   </main>
 

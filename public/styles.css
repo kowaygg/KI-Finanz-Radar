@@ -114,16 +114,7 @@ body {
 .kopf-uhr { margin-top: 6px; font-size: 1rem; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
 .uhr { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--akzent); }
 .trenner { color: var(--text-leise); }
-.kopf-boersen { display: grid; gap: 3px; margin-top: 6px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
-.boersen-land { display: grid; grid-template-columns: 6.5em 1fr; gap: 6px; align-items: baseline; }
 .land { color: var(--text-leise); }
-.boersen-liste { display: flex; flex-wrap: wrap; gap: 2px 16px; }
-.boerse { white-space: nowrap; }
-@media (max-width: 699px) {
-  .boersen-land { grid-template-columns: 1fr; gap: 0; }
-  .land { font-size: 0.8rem; }
-  .boersen-liste { flex-direction: column; }
-}
 .boerse-offen .punkt { color: var(--positiv); font-weight: 600; }
 .boerse-zu .punkt { color: var(--text-leise); }
 .kopf-wichtig { color: var(--akzent); font-weight: 600; }
@@ -209,3 +200,27 @@ body {
 .knopf-leise { background: var(--badge-hg); color: var(--text); font-weight: 500; }
 .knopf:focus-visible, .knopf-leise:focus-within { outline: 2px solid var(--akzent); outline-offset: 2px; }
 .unsichtbar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Reiterleiste: auf dem Handy waagrecht wischbar */
+.reiter { overflow-x: auto; scrollbar-width: thin; }
+.reiter button { white-space: nowrap; flex: 0 0 auto; }
+.abschnitt { font-size: 1rem; margin: 18px 0 8px; color: var(--text-leise); font-weight: 600; }
+
+/* Reiter „Börsen“ */
+.boersen-tafel { display: grid; gap: 14px; margin-top: 12px; }
+.boersen-gruppe { background: var(--flaeche); border: 1px solid var(--linie); border-radius: 10px; padding: 8px 12px; }
+.boersen-gruppe .land { margin: 0 0 4px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.boerse-zeile { display: grid; grid-template-columns: minmax(9em, 1.3fr) minmax(8em, 1fr) minmax(10em, 1.4fr) auto; gap: 4px 12px; padding: 6px 0; border-top: 1px solid var(--linie); align-items: baseline; font-variant-numeric: tabular-nums; }
+.boersen-gruppe .boerse-zeile:first-of-type { border-top: 0; }
+.boerse-ort { color: var(--text-leise); font-size: 0.85rem; text-align: right; }
+.boerse-zu .punkt { color: var(--text-leise); }
+@media (max-width: 699px) {
+  .boerse-zeile { grid-template-columns: 1fr auto; }
+  .boerse-countdown { grid-column: 1; font-size: 0.85rem; }
+  .boerse-ort { grid-column: 2; }
+}
+@media (max-width: 699px) {
+  .reiter { gap: 2px; padding: 0 8px; }
+  .reiter button { padding: 10px 5px; font-size: 0.86rem; }
+  .reiter .zaehler { font-size: 0.7rem; padding: 0 4px; min-width: 1.2em; }
+}

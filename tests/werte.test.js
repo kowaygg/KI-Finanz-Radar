@@ -40,3 +40,24 @@ test('Gebündelte Abfrage; bei Ausfall bleibt der letzte Stand je Wert', async (
   assert.equal(nach['4GLD.DE'].kurs, null);
   assert.equal(r.fehler.length, 1);
 });
+
+import { verlaeufeHolen, verlaufDatei } from '../src/werte.js';
+
+test('Verläufe: fällige Zeiträume holen, seltene Zeiträume überspringen, Dateiname sicher', async () => {
+  const liste = [{ symbol: 'SAP.DE' }, { symbol: 'BRK-B' }];
+  const zeitraeume = [{ schluessel: '1T', range: '1d', interval: '5m', minuten: 0 }, { schluessel: 'Max', range: 'max', interval: '1mo', minuten: 1440 }];
+  const urls = [];
+  const holen = async (url) => {
+    urls.push(url);
+    return { ok: true, json: async () => ({ 'SAP.DE': { timestamp: [1, 2, 3], close: [10, null, 12], chartPreviousClose: 9 } }) };
+  };
+  const jetzt = new Date('2026-10-21T12:00:00Z');
+  const r = await verlaeufeHolen(liste, zeitraeume, {}, { Max: '2026-10-21T08:00:00Z' }, { adresse: 'https://k.test/spark', userAgent: 'x', holen, jetzt });
+  assert.equal(urls.length, 1);
+  assert.ok(urls[0].includes('range=1d'));
+  assert.deepEqual(r.verlaeufe['SAP.DE'].verlauf['1T'], [[1000, 10], [3000, 12]]);
+  assert.equal(r.verlaeufe['SAP.DE'].vortag, 9);
+  assert.equal(r.zeitstempel['1T'], jetzt.toISOString());
+  assert.equal(r.zeitstempel.Max, '2026-10-21T08:00:00Z');
+  assert.equal(verlaufDatei('^GDAXI'), '_GDAXI.json');
+});

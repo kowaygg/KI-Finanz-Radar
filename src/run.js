@@ -11,7 +11,7 @@ import { sichererLink } from './bereinigen.js';
 import { ketteErstellen } from './ki/kette.js';
 import { kiDurchlauf } from './ki/analyse.js';
 import { kurseHolen } from './kurse.js';
-import { werteHolen } from './werte.js';
+import { werteHolen, verlaeufeHolen, verlaufDatei } from './werte.js';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -136,12 +136,24 @@ export async function abrufStarten() {
       });
       await jsonSchreiben(join(WURZEL, 'data', 'werte.json'), werte);
       await jsonSchreiben(join(AUSGABE, 'werte.json'), werte);
+
+      // Verläufe (1T … Max) aller Werte für den Reiter „Kurse“ – eine Datei pro Wert, die App lädt nur die ihrer Watchlist.
+      const altVerlauf = await jsonLesen(join(WURZEL, 'data', 'verlaeufe.json'), { verlaeufe: {}, zeitstempel: {} });
+      const v = await verlaeufeHolen(liste, kursEinstellungen.werteZeitraeume || [], altVerlauf.verlaeufe, altVerlauf.zeitstempel, {
+        adresse: kursEinstellungen.quelle.adresse.replace('/chart/', '/spark'), userAgent: einstellungen.userAgent, jetzt, maxPunkte: kursEinstellungen.maxPunkte,
+      });
+      await jsonSchreiben(join(WURZEL, 'data', 'verlaeufe.json'), { verlaeufe: v.verlaeufe, zeitstempel: v.zeitstempel });
+      for (const w of liste) {
+        const eintrag = v.verlaeufe[w.symbol];
+        if (eintrag) await jsonSchreiben(join(AUSGABE, 'verlauf', verlaufDatei(w.symbol)), { name: w.name, symbol: w.symbol, ...eintrag });
+      }
     }
   }
-  const { boersen } = await jsonLesen(join(WURZEL, 'config', 'boersen.json'), { boersen: [] });
+  const { boersen, _hinweis: boersenHinweis } = await jsonLesen(join(WURZEL, 'config', 'boersen.json'), { boersen: [] });
   const { termine } = await jsonLesen(join(WURZEL, 'config', 'termine.json'), { termine: [] });
   await jsonSchreiben(join(AUSGABE, 'kalender.json'), {
     boersen,
+    boersenHinweis: boersenHinweis || '',
     termine: termine.filter((t) => Date.parse(t.zeit) > jetzt.getTime() - 3600 * 1000).sort((a, b) => Date.parse(a.zeit) - Date.parse(b.zeit)),
   });
 

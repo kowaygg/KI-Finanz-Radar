@@ -199,20 +199,46 @@ const fmtUhrSek = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, hour: '
 let kalender = { boersen: [], termine: [] };
 let letzterStatus = null;
 
-function boersenText(boerse, jetzt) {
+const fmtHhMm = (zeitzone) => new Intl.DateTimeFormat('de-DE', { timeZone: zeitzone, hour: '2-digit', minute: '2-digit' });
+
+// Eine Zeile im Reiter „Börsen“: Name, Status, Countdown, Handelszeit in deutscher Zeit, Ortszeit.
+function boersenZeile(boerse, jetzt) {
   const s = boersenStatus(boerse, jetzt);
-  const zeile = element('span', `boerse ${s.offen ? 'boerse-offen' : 'boerse-zu'}`);
-  zeile.append(element('strong', null, boerse.name), ' ');
-  zeile.append(element('span', 'punkt', s.offen ? '● offen' : '○ geschlossen'));
+  const zeile = element('div', `boerse-zeile ${s.offen ? 'boerse-offen' : 'boerse-zu'}`);
+  zeile.append(element('strong', 'boerse-name', boerse.name));
+  const status = s.offen ? '● offen' : s.mittagspause ? '◐ Mittagspause' : '○ geschlossen';
+  zeile.append(element('span', 'punkt', status));
+  let rest = '';
   if (s.offen) {
-    zeile.append(` · schließt in ${countdown(s.schliesst - jetzt)}${s.fruehschluss ? ' (Frühschluss)' : ''}`);
+    rest = `${s.mittagspause ? 'Pause' : 'schließt'} in ${countdown(s.schliesst - jetzt)}${s.fruehschluss ? ' (Frühschluss)' : ''}`;
   } else if (s.oeffnet) {
-    const rest = s.oeffnet - jetzt;
-    const uhr = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, hour: '2-digit', minute: '2-digit' }).format(s.oeffnet);
-    zeile.append(rest < 24 * 3600 * 1000 ? ` · öffnet in ${countdown(rest)}` : ` · öffnet ${kurzerTag(s.oeffnet)} ${uhr}`);
-    if (s.feiertag) zeile.append(' (Feiertag)');
+    const bis = s.oeffnet - jetzt;
+    rest = bis < 24 * 3600 * 1000 ? `öffnet in ${countdown(bis)}` : `öffnet ${kurzerTag(s.oeffnet)} ${fmtHhMm(ZEITZONE).format(s.oeffnet)}`;
+    if (s.feiertag) rest += ' (Feiertag)';
   }
-  return zeile;
+  zeile.append(element('span', 'boerse-countdown', rest));
+  const ort = fmtHhMm(boerse.zeitzone).format(jetzt);
+  zeile.append(element('span', 'boerse-ort', `Ortszeit ${ort}`));
+  return { zeile, offen: s.offen };
+}
+
+function boersenAnzeigen(jetzt) {
+  const laender = [...new Set(kalender.boersen.map((b) => b.land || ''))];
+  let offen = 0;
+  $('boersen').replaceChildren(...laender.map((land) => {
+    const gruppe = element('section', 'boersen-gruppe');
+    gruppe.append(element('h3', 'land', land));
+    for (const b of kalender.boersen.filter((x) => (x.land || '') === land)) {
+      const z = boersenZeile(b, jetzt);
+      if (z.offen) offen++;
+      gruppe.append(z.zeile);
+    }
+    return gruppe;
+  }));
+  $('zaehler-boersen').hidden = offen === 0;
+  $('zaehler-boersen').textContent = `${offen} offen`;
+  $('boersen-hinweis').textContent = kalender.boersenHinweis
+    ? `Zeiten in deutscher Zeit, Countdown live. ${kalender.boersenHinweis}` : 'Zeiten in deutscher Zeit, Countdown live.';
 }
 
 function kopfTicken() {
@@ -220,16 +246,7 @@ function kopfTicken() {
   $('datum').textContent = fmtLang.format(jetzt);
   $('kw').textContent = `KW ${kalenderwoche(jetzt, ZEITZONE)}`;
   $('uhr').textContent = fmtUhrSek.format(jetzt);
-  // Nach Land gruppiert: „Deutschland: Xetra … · Börse Frankfurt …“, „USA: NYSE … · Nasdaq …“
-  const laender = [...new Set(kalender.boersen.map((b) => b.land || ''))];
-  $('boersen').replaceChildren(...laender.map((land) => {
-    const zeile = element('div', 'boersen-land');
-    zeile.append(element('span', 'land', land ? `${land}:` : ''));
-    const liste = element('span', 'boersen-liste');
-    liste.append(...kalender.boersen.filter((b) => (b.land || '') === land).map((b) => boersenText(b, jetzt)));
-    zeile.append(liste);
-    return zeile;
-  }));
+  boersenAnzeigen(jetzt);
   if (letzterStatus && jetzt.getSeconds() === 0) standAnzeigen(letzterStatus);
   // Termine, die vorbei sind, fallen von selbst weg.
   const naechster = kalender.termine.find((t) => Date.parse(t.zeit) > jetzt.getTime());
@@ -328,9 +345,13 @@ function diagrammKarte(index, zeitraeume, quelle) {
   return karte;
 }
 
+let kursZeitraeume = [];
+let kursQuelle = '';
+
 function maerkteAnzeigen(kurse) {
+  kursZeitraeume = kurse?.zeitraeume || [];
+  kursQuelle = kurse?.quelle || '';
   const indizes = (kurse?.indizes || []).filter((i) => Object.keys(i.verlauf || {}).length);
-  $('maerkte').hidden = indizes.length === 0;
   $('maerkte').replaceChildren(...indizes.map((i) => diagrammKarte(i, kurse.zeitraeume || [], kurse.quelle || '')));
 
   // Marktstimmung für die Kopfzeile aus der Tagesveränderung.
@@ -362,6 +383,26 @@ function topNewsAnzeigen(meldungen) {
     li.append(meta);
     return li;
   }));
+}
+
+// ---------- Reiter „Kurse“: Kurven der Watchlist-Werte (Daten aus der öffentlichen Werteliste) ----------
+const verlaufDatei = (symbol) => `${symbol.replace(/[^A-Za-z0-9.-]/g, '_')}.json`;
+
+async function kurseWatchlistAnzeigen() {
+  const mitWert = watchlist.map((e) => ({ e, w: wertZu(e) })).filter((x) => x.w);
+  const ohne = watchlist.filter((e) => !wertZu(e));
+  $('kurse-watchlist-leer').hidden = watchlist.length > 0;
+  $('kurse-ohne-daten').hidden = ohne.length === 0;
+  $('kurse-ohne-daten').textContent = ohne.length ? `Ohne Kursdaten (nicht in der öffentlichen Werteliste): ${ohne.map((e) => e.name).join(', ')}` : '';
+  const karten = await Promise.all(mitWert.map(async ({ e, w }) => {
+    try {
+      const v = await jsonHolen(`data/verlauf/${verlaufDatei(w.symbol)}`);
+      return diagrammKarte({ name: e.name, land: `${w.art} · ${w.symbol}`, symbol: w.symbol, verlauf: v.verlauf || {}, stand: v.stand || {}, vortag: v.vortag }, kursZeitraeume, kursQuelle);
+    } catch {
+      return null;
+    }
+  }));
+  $('kurse-watchlist').replaceChildren(...karten.filter(Boolean));
 }
 
 // ---------- Watchlist (nur auf diesem Gerät) ----------
@@ -484,7 +525,7 @@ function watchlistBearbeitenEinrichten() {
 }
 
 function reiterWechseln(ziel) {
-  for (const name of ['ticker', 'wichtig', 'watchlist']) {
+  for (const name of ['ticker', 'wichtig', 'watchlist', 'kurse', 'boersen']) {
     const aktiv = name === ziel;
     $(`tab-${name}`).setAttribute('aria-selected', String(aktiv));
     $(`ansicht-${name}`).hidden = !aktiv;
@@ -521,6 +562,7 @@ async function laden() {
   letzteMeldungen = meldungen;
   topNewsAnzeigen(meldungen);
   watchlistAnzeigen();
+  kurseWatchlistAnzeigen();
   const ticker = $('liste-ticker');
   ticker.replaceChildren(...meldungen.map((m) => meldungElement(m, zuletztGesehen)));
   if (!meldungen.length) ticker.append(element('li', 'leer', 'Noch keine Meldungen geladen.'));
@@ -547,6 +589,8 @@ async function laden() {
 $('tab-ticker').addEventListener('click', () => reiterWechseln('ticker'));
 $('tab-wichtig').addEventListener('click', () => reiterWechseln('wichtig'));
 $('tab-watchlist').addEventListener('click', () => reiterWechseln('watchlist'));
+$('tab-kurse').addEventListener('click', () => reiterWechseln('kurse'));
+$('tab-boersen').addEventListener('click', () => reiterWechseln('boersen'));
 watchlistBearbeitenEinrichten();
 
 if ('serviceWorker' in navigator) {
