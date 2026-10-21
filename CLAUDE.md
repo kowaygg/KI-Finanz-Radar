@@ -230,6 +230,7 @@ VORGEHEN
 - 21.10.2026: Name überall „KI-Finanz-Radar“: Repo `KI-Finanz-Radar` (öffentlich, Adresse https://kowaygg.github.io/KI-Finanz-Radar/ – Groß-/Kleinschreibung beachten), App-Name „KI-Finanz-Radar“
 - 21.10.2026: Technik: Node.js (schon installiert), kein Python
 - Alle Rückfragen vom 21.10.2026 beantwortet
+- 21.10.2026 (M3): Repo https://github.com/kowaygg/KI-Finanz-Radar (öffentlich), Secret `GEMINI_API_KEY` gesetzt, Pages-Quelle „GitHub Actions“. Sicherheit: Secret Protection + Push Protection an, Dependency graph + Dependabot alerts an (Security updates aus – keine npm-Abhängigkeiten). Push-Anmeldung über Git Credential Manager
 - 21.10.2026 (M2): KI in zwei Stufen (Bewertung 25/Anfrage, Analyse ab Relevanz 7, 5/Anfrage, max. 4+4 Anfragen pro Lauf). Fehler pro Modell: 429/404/503 → nächstes Modell desselben Dienstes, 401/403 → nächster Dienst. KI vergibt Ereignis-Kürzel → gleiche Ereignisse (auch sprachübergreifend) in „Wichtig“ zusammengefasst. Clickbait/Gerüchte max. Relevanz 3. Prompt verlangt Strenge (~10 % ≥ 7, PR max. 6). Modelle 21.10.2026 per ki-check bestätigt: gemini-3.8-flash, gemini-3.5-flash-lite, gemini-2.5-flash
 - 21.10.2026 (M1): Nur Meldungen der letzten 48 h aufnehmen; Teaser nur intern als KI-Eingabe, nie veröffentlicht/angezeigt; Service Worker holt alles zuerst aus dem Netz (Offline-Fallback)
 - 21.10.2026 (M3, ersetzt Daten-Zweig-Idee): Arbeitsstand `data/zustand.json` liegt im GitHub-Actions-Cache (neuer Schlüssel pro Lauf, Wiederherstellung über Präfix) – keine Daten-Commits, Repo bleibt klein, Teaser nicht öffentlich. Geht der Cache verloren, werden die letzten 48 h neu geholt und neu bewertet.
@@ -261,7 +262,8 @@ VORGEHEN
 
 ### Offene Punkte
 - Rückfragen: erledigt (21.10.2026)
-- M1 (0.1.0) und M2 (0.2.0) fertig und lokal getestet (21.10.2026) – als Nächstes M3 (Online gehen: GitHub-Repo, Secrets, Actions alle 15 Min., Pages)
+- M1 (0.1.0), M2 (0.2.0) und M3 fertig (21.10.2026): online unter https://kowaygg.github.io/KI-Finanz-Radar/ – Abruf alle 15 Min. per GitHub Actions; erster Lauf erfolgreich (10/10 Quellen, Gemini aktiv)
+- Als Nächstes: M4 (Kurse, Watchlist, Kopfzeile)
+- Dependabot hat einen PR für eine Action-Aktualisierung geöffnet → bei der monatlichen Wartung prüfen (nicht ungeprüft übernehmen)
 - Groq-/Mistral-/OpenRouter-Konten noch nicht angelegt (Kette läuft vorerst nur mit Gemini)
 - Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen
-- Leeres öffentliches Repo `KI-Finanz-Radar` auf GitHub anlegen und verbinden (erst wenn Version 1 steht)
