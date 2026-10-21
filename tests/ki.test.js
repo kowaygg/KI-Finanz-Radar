@@ -172,6 +172,32 @@ test('Durchlauf: gleiches Ereignis aus zwei Quellen erscheint nur einmal in „W
   assert.ok(anfragen[1].includes('"id":"a"') && !anfragen[1].includes('"id":"b"'));
 });
 
+test('Durchlauf: englische Überschriften bekommen eine deutsche Übersetzung', async () => {
+  const meldungen = [
+    { id: 'a', titel: 'Fed raises rates', teaser: '', sprache: 'en', vorfilter: 'ok', ki: null, datum: '2026-10-21T10:00:00Z' },
+    { id: 'b', titel: 'Football: Arsenal wins', teaser: '', sprache: 'en', vorfilter: 'ohneKi', ki: null, datum: '2026-10-21T10:00:00Z' },
+    { id: 'c', titel: 'DAX steigt', teaser: '', sprache: 'de', vorfilter: 'ohneKi', ki: null, datum: '2026-10-21T10:00:00Z' },
+  ];
+  const gesendet = [];
+  const kette = {
+    fragen: async (anweisung, nachricht) => {
+      gesendet.push(nachricht);
+      if (anweisung.includes('AUFGABE: Bewerte')) {
+        return { dienst: 'T', modell: 'm', json: { bewertungen: [{ id: 'a', relevanz: 4, kategorie: 'Wirtschaft', stimmung: 'neutral', titelDe: 'Fed erhöht die Zinsen' }] } };
+      }
+      return { dienst: 'T', modell: 'm', json: { titel: [{ id: 'b', de: 'Fußball: Arsenal gewinnt' }, { id: 'c', de: 'darf nicht' }] } };
+    },
+  };
+  const einst = { meldungenProBewertung: 25, meldungenProAnalyse: 5, maxBewertungsAnfragenProLauf: 4, maxAnalyseAnfragenProLauf: 4 };
+  const bericht = await kiDurchlauf(meldungen, kette, { kiEinstellungen: einst, relevanzSchwelle: 7, jetzt: new Date('2026-10-21T12:00:00Z') });
+  assert.equal(meldungen[0].titelDe, 'Fed erhöht die Zinsen');
+  assert.equal(meldungen[0].ki.titelDe, undefined);
+  assert.equal(meldungen[1].titelDe, 'Fußball: Arsenal gewinnt');
+  assert.equal(meldungen[2].titelDe, undefined);
+  assert.equal(bericht.uebersetzt, 1);
+  assert.ok(!gesendet[1].includes('DAX steigt'));
+});
+
 test('Durchlauf: alle Dienste am Limit → Meldungen bleiben offen und werden später nachgeholt', async () => {
   const meldungen = [{ id: 'a', titel: 'x', teaser: 't', vorfilter: 'ok', ki: null, datum: '2026-10-21T10:00:00Z' }];
   const einst = { meldungenProBewertung: 25, meldungenProAnalyse: 5, maxBewertungsAnfragenProLauf: 4, maxAnalyseAnfragenProLauf: 4 };

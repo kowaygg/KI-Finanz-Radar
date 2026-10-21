@@ -222,7 +222,7 @@ VORGEHEN
 - 21.10.2026: KI-Ausweichkette festgelegt: Gemini → Groq → Mistral → OpenRouter (alle ohne Kreditkarte; Mistral braucht Handynummer; OpenRouter ohne Guthaben nur ~50 Anfragen/Tag → letzte Reserve). Konten werden erst beim Einbau angelegt.
 - 21.10.2026: Handy = Android (PWA-Installation über Chrome; iPhone-Anleitung nur nebenbei)
 - 21.10.2026: Push über ntfy (ntfy.sh, Android-App): Relevanz 9–10, Wartungsbericht sonntags, Warnung bei Abruf-Ausfall >3 h. Langer Zufalls-Kanalname, nur öffentliche Inhalte
-- 21.10.2026: Englische Quellen erlaubt; „Wichtig“ immer Deutsch, Live-Ticker zeigt Original-Überschrift (spart Kontingent)
+- 21.10.2026: Englische Quellen erlaubt; ALLES auf Deutsch (Wunsch des Nutzers, ersetzt „Ticker im Original“): KI liefert `titelDe` bei der Bewertung mit, ältere/nicht bewertete englische Titel per Übersetzungs-Anfrage (1 pro Lauf, 50 Titel). Links zu englischen Artikeln öffnen über Google Übersetzer (translate.google.com → *.translate.goog) auf Deutsch; Originalseite zusätzlich verlinkt
 - 21.10.2026: Regionen: Schwerpunkt DE/EU + USA; Asien nur große Themen (China, Taiwan/TSMC, Japan, Zölle). Krypto-News ja, nur große Bewegungen und Regulierung (keine Kleinst-Coins)
 - 21.10.2026: Watchlist bis ca. 10 Werte; Werte ohne freien Kurs zeigen nur News
 - 21.10.2026: Watchlist-Kurse = Variante B: Cloud lädt Kurse einer großen öffentlichen Werteliste (einige hundert: DAX, MSCI World, S&P 500, Nasdaq, beliebte ETFs); die App filtert die Watchlist NUR lokal. Die Werteliste darf nie gezielt nach der Watchlist zusammengestellt werden; einzelne fehlende Werte nur nach ausdrücklichem OK des Nutzers ergänzen, sonst nur News

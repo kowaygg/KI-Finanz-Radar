@@ -22,11 +22,12 @@ AUFGABE: Bewerte jede Meldung.
 - stimmung: eine aus ${JSON.stringify(STIMMUNGEN)} (Wirkung auf die betroffenen Märkte)
 - clickbait: true bei reißerischer Überschrift ohne Substanz oder Werbung
 - geruecht: true, wenn es nur ein Gerücht ohne genannte Quelle ist
+- titelDe: NUR bei Meldungen mit "sprache":"en" – sachliche deutsche Übersetzung der Überschrift; bei deutschen Meldungen weglassen
 - ereignis: kurzes Kürzel für das konkrete Ereignis, nur Kleinbuchstaben, Ziffern und Bindestriche (z. B. "tesla-spacex-fusion", "ezb-zinsentscheid-oktober").
   Meldungen über DASSELBE Ereignis (auch in verschiedenen Sprachen oder Formulierungen) bekommen dasselbe Kürzel.
   Passt eine Meldung zu einem Kürzel aus "bekannteEreignisse", verwende genau dieses Kürzel.
 
-FORMAT: {"bewertungen":[{"id":"…","relevanz":7,"kategorie":"Börse","schlagwoerter":["…"],"stimmung":"neutral","clickbait":false,"geruecht":false,"ereignis":"…"}]}
+FORMAT: {"bewertungen":[{"id":"…","relevanz":7,"kategorie":"Börse","schlagwoerter":["…"],"stimmung":"neutral","clickbait":false,"geruecht":false,"titelDe":"…","ereignis":"…"}]}
 Gib für JEDE übergebene id genau einen Eintrag zurück.`;
 
 export const ANALYSIEREN = `${GRUNDREGELN}
@@ -39,6 +40,13 @@ AUFGABE: Analysiere jede wichtige Meldung ausführlich.
 - vergleich: historischer Vergleich NUR wenn gut belegt und allgemein bekannt, sonst null. Lieber weglassen als raten.
 
 FORMAT: {"analysen":[{"id":"…","titel":"…","zusammenfassung":["…"],"betroffen":{"aktien":[],"etfs":[],"branchen":[]},"einschaetzung":{"text":"…","zeithorizont":"kurzfristig","sicherheit":"mittel"},"vergleich":null}]}
+Gib für JEDE übergebene id genau einen Eintrag zurück.`;
+
+export const UEBERSETZEN = `${GRUNDREGELN}
+
+AUFGABE: Übersetze jede Überschrift sachlich ins Deutsche (ohne Übertreibung, Firmen- und Produktnamen bleiben).
+
+FORMAT: {"titel":[{"id":"…","de":"…"}]}
 Gib für JEDE übergebene id genau einen Eintrag zurück.`;
 
 // Baut die Nutzer-Nachricht: nur Daten als JSON, klar abgegrenzt.

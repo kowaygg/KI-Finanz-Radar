@@ -28,6 +28,43 @@ function sichererLink(roh) {
   }
 }
 
+// Englische Artikel öffnen über Google Übersetzer direkt auf Deutsch; deutsche Artikel unverändert.
+function leseLink(m, link = m.link) {
+  const sicher = sichererLink(link);
+  if (!sicher || m.sprache !== 'en') return sicher;
+  return `https://translate.google.com/translate?sl=auto&tl=de&hl=de&u=${encodeURIComponent(sicher)}`;
+}
+
+function anzeigeTitel(m) {
+  return m.ki?.analyse?.titel || m.titelDe || m.titel;
+}
+
+function titelLink(m, text) {
+  const link = leseLink(m);
+  const el = element(link ? 'a' : 'span', 'titel', text);
+  if (link) {
+    el.href = link;
+    el.target = '_blank';
+    el.rel = 'noopener noreferrer';
+    if (m.sprache === 'en') el.title = 'Öffnet den Artikel auf Deutsch übersetzt';
+  }
+  return el;
+}
+
+function originalZeile(m) {
+  if (m.sprache !== 'en' || anzeigeTitel(m) === m.titel) return null;
+  const zeile = element('div', 'original', `Original: ${m.titel} · `);
+  const link = sichererLink(m.link);
+  if (link) {
+    const a = element('a', null, 'Originalseite (Englisch)');
+    a.href = link;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    zeile.append(a);
+  }
+  return zeile;
+}
+
 function zeitText(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
@@ -50,15 +87,7 @@ function meldungElement(m, zuletztGesehen) {
   zeit.dateTime = m.datum;
   meta.append(zeit, element('span', null, m.quelle), element('span', 'badge', m.kategorie));
   li.append(meta);
-
-  const link = sichererLink(m.link);
-  const titel = element(link ? 'a' : 'span', 'titel', m.titel);
-  if (link) {
-    titel.href = link;
-    titel.target = '_blank';
-    titel.rel = 'noopener noreferrer';
-  }
-  li.append(titel);
+  li.append(titelLink(m, anzeigeTitel(m)));
 
   const weitere = (m.quellen || []).filter((q) => q.name !== m.quelle && sichererLink(q.link));
   if (weitere.length) {
@@ -103,16 +132,9 @@ function wichtigElement(m) {
     element('span', `stimmung stimmung-${ki.stimmung}`, STIMMUNG[ki.stimmung] || ''),
   );
   li.append(meta);
-
-  const link = sichererLink(m.link);
-  const titel = element(link ? 'a' : 'span', 'titel', analyse?.titel || m.titel);
-  if (link) {
-    titel.href = link;
-    titel.target = '_blank';
-    titel.rel = 'noopener noreferrer';
-  }
-  li.append(titel);
-  if (analyse?.titel && analyse.titel !== m.titel) li.append(element('div', 'original', `Original: ${m.titel}`));
+  li.append(titelLink(m, anzeigeTitel(m)));
+  const original = originalZeile(m);
+  if (original) li.append(original);
 
   const schlag = chips('Themen', ki.schlagwoerter);
   if (schlag) li.append(schlag);

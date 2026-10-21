@@ -34,5 +34,6 @@
   "meldungenProAnalyse": 5,
   "maxBewertungsAnfragenProLauf": 4,
   "maxAnalyseAnfragenProLauf": 4,
+  "titelProUebersetzung": 50,
   "timeoutSekunden": 90
 }

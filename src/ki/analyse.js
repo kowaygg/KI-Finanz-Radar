@@ -1,8 +1,8 @@
 // KI-Durchlauf: nur NEUE Meldungen, gebündelt. Erst Kurzbewertung (Relevanz usw.),
 // dann ausführliche Analyse nur ab der Relevanzschwelle. Was nicht klappt, wird später nachgeholt.
 
-import { BEWERTEN, ANALYSIEREN, datenNachricht } from './anweisungen.js';
-import { bewertungenPruefen, analysenPruefen } from './pruefen.js';
+import { BEWERTEN, ANALYSIEREN, UEBERSETZEN, datenNachricht } from './anweisungen.js';
+import { bewertungenPruefen, analysenPruefen, uebersetzungenPruefen } from './pruefen.js';
 
 function paeckchen(liste, groesse) {
   const ergebnis = [];
@@ -52,8 +52,10 @@ export async function kiDurchlauf(meldungen, kette, { kiEinstellungen, relevanzS
     for (const m of gruppe) {
       const b = geprueft.get(m.id);
       if (!b) continue;
-      m.ki = { ...b, dienst: antwort.dienst, modell: antwort.modell, bewertetAm: jetzt.toISOString(), analyse: null };
+      const { titelDe, ...bewertung } = b;
+      m.ki = { ...bewertung, dienst: antwort.dienst, modell: antwort.modell, bewertetAm: jetzt.toISOString(), analyse: null };
       m.kategorie = b.kategorie;
+      if (m.sprache === 'en' && titelDe) m.titelDe = titelDe;
       if (b.relevanz < relevanzSchwelle) m.teaser = '';
       bericht.bewertet++;
     }
@@ -73,6 +75,23 @@ export async function kiDurchlauf(meldungen, kette, { kiEinstellungen, relevanzS
         m.ki.analyse = { ...a, dienst: antwort.dienst, modell: antwort.modell, analysiertAm: jetzt.toISOString() };
         m.teaser = '';
         bericht.analysiert++;
+      }
+    }
+  }
+
+  // Englische Überschriften ohne Übersetzung (ältere oder nicht an die KI gegangene Meldungen): eine Anfrage pro Lauf.
+  if (!bericht.abgebrochen) {
+    const offenUebersetzung = meldungen
+      .filter((m) => m.sprache === 'en' && !m.titelDe && m.vorfilter !== 'werbung' && (m.ki || m.vorfilter === 'ohneKi'))
+      .sort(neuesteZuerst)
+      .slice(0, kiEinstellungen.titelProUebersetzung ?? 50);
+    if (offenUebersetzung.length) {
+      bericht.anfragen++;
+      const antwort = await kette.fragen(UEBERSETZEN, datenNachricht(offenUebersetzung.map((m) => ({ ...m, teaser: '' }))));
+      if (antwort) {
+        const geprueft = uebersetzungenPruefen(antwort.json, new Set(offenUebersetzung.map((m) => m.id)));
+        for (const m of offenUebersetzung) if (geprueft.has(m.id)) m.titelDe = geprueft.get(m.id);
+        bericht.uebersetzt = geprueft.size;
       }
     }
   }

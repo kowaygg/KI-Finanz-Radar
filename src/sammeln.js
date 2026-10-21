@@ -59,7 +59,7 @@ export function oeffentlicheMeldungen(meldungen) {
   return meldungen
     .filter((m) => m.vorfilter !== 'werbung')
     .sort((a, b) => Date.parse(b.datum) - Date.parse(a.datum))
-    .map(({ id, titel, link, quelle, kategorie, sprache, datum, gefunden, quellen, ki }) => ({
-      id, titel, link, quelle, kategorie, sprache, datum, gefunden, quellen, ki,
+    .map(({ id, titel, titelDe, link, quelle, kategorie, sprache, datum, gefunden, quellen, ki }) => ({
+      id, titel, titelDe: titelDe || null, link, quelle, kategorie, sprache, datum, gefunden, quellen, ki,
     }));
 }

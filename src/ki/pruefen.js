@@ -36,8 +36,19 @@ export function bewertungenPruefen(antwort, erlaubteIds) {
       stimmung,
       clickbait,
       geruecht,
+      titelDe: text(b.titelDe, 300) || null,
       ereignis: typeof b.ereignis === 'string' ? b.ereignis.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').slice(0, 60) || null : null,
     });
+  }
+  return ergebnis;
+}
+
+export function uebersetzungenPruefen(antwort, erlaubteIds) {
+  const ergebnis = new Map();
+  for (const t of Array.isArray(antwort?.titel) ? antwort.titel : []) {
+    if (!t || !erlaubteIds.has(t.id) || ergebnis.has(t.id)) continue;
+    const de = text(t.de, 300);
+    if (de) ergebnis.set(t.id, de);
   }
   return ergebnis;
 }
