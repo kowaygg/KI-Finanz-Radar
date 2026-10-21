@@ -38,7 +38,7 @@
         <div id="zeile-wetter" hidden><dt>Wetter</dt><dd id="wetter"></dd></div>
         <div id="zeile-termin" hidden><dt>Nächster Termin</dt><dd id="termin"></dd></div>
         <div id="zeile-stimmung" hidden><dt>Marktstimmung</dt><dd id="stimmung"></dd></div>
-        <div><dt>Watchlist heute</dt><dd class="leise">folgt mit den Kursen (Meilenstein 4)</dd></div>
+        <div><dt>Watchlist heute</dt><dd id="watchlist-heute" class="leise">noch leer – im Reiter „Watchlist“ anlegen</dd></div>
       </dl>
     </details>
     <p id="warnung" class="warnung" hidden></p>
@@ -52,6 +52,7 @@
   <nav class="reiter" role="tablist" aria-label="Ansicht">
     <button role="tab" id="tab-ticker" aria-controls="ansicht-ticker" aria-selected="true">Live-Ticker <span id="zaehler-ticker" class="zaehler" hidden></span></button>
     <button role="tab" id="tab-wichtig" aria-controls="ansicht-wichtig" aria-selected="false">Wichtig <span id="zaehler-wichtig" class="zaehler" hidden></span></button>
+    <button role="tab" id="tab-watchlist" aria-controls="ansicht-watchlist" aria-selected="false">Watchlist <span id="zaehler-watchlist" class="zaehler warn" hidden></span></button>
   </nav>
 
   <main>
@@ -62,6 +63,23 @@
     <section id="ansicht-wichtig" role="tabpanel" aria-labelledby="tab-wichtig" hidden>
       <ol id="liste-wichtig" class="liste"></ol>
       <p id="wichtig-leer" class="leer" hidden>Noch keine wichtigen Meldungen. Die KI bewertet neue Meldungen bei jedem Abruf.</p>
+    </section>
+    <section id="ansicht-watchlist" role="tabpanel" aria-labelledby="tab-watchlist" hidden>
+      <p class="privat-hinweis">🔒 Deine Watchlist bleibt nur auf diesem Gerät. Sie wird nirgends hingeschickt – die Kurse kommen aus einer großen öffentlichen Liste, aus der die App deine Werte hier heraussucht.</p>
+      <ol id="liste-watchlist" class="liste"></ol>
+      <p id="watchlist-leer" class="leer" hidden>Noch keine Werte. Unten unter „Watchlist bearbeiten“ Name und ISIN eintragen.</p>
+      <details id="watchlist-bearbeiten" class="watchlist-bearbeiten">
+        <summary>Watchlist bearbeiten / importieren</summary>
+        <p class="klein-hinweis">Eine Zeile pro Wert: <code>Name;ISIN</code> – z. B. <code>SAP;DE0007164600</code>. Nur Name und ISIN – keine Beträge, Stückzahlen oder Kaufkurse.</p>
+        <label for="watchlist-text" class="unsichtbar">Watchlist (Name;ISIN pro Zeile)</label>
+        <textarea id="watchlist-text" rows="8" spellcheck="false" autocomplete="off"></textarea>
+        <div class="knopf-zeile">
+          <button type="button" id="watchlist-speichern" class="knopf">Speichern</button>
+          <label class="knopf knopf-leise">Datei importieren<input type="file" id="watchlist-datei" accept=".json,.txt,.csv" hidden></label>
+          <button type="button" id="watchlist-loeschen" class="knopf knopf-leise">Alles löschen</button>
+        </div>
+        <p id="watchlist-meldung" class="klein-hinweis" role="status"></p>
+      </details>
     </section>
   </main>
 

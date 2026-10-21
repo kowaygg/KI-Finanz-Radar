@@ -185,3 +185,27 @@ body {
 .zeiger { stroke: var(--text); stroke-width: 1; opacity: 0.7; }
 .kurs-achse { display: flex; justify-content: space-between; gap: 6px; font-size: 0.72rem; color: var(--text-leise); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .kurs-fuss { font-size: 0.72rem; color: var(--text-leise); margin-top: 4px; min-height: 1.2em; font-variant-numeric: tabular-nums; }
+
+/* Watchlist */
+.privat-hinweis { font-size: 0.85rem; color: var(--text-leise); background: var(--flaeche); border-radius: 8px; padding: 8px 12px; margin: 12px 0 4px; }
+.wl-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.wl-name { display: flex; flex-direction: column; }
+.wl-isin { font-size: 0.75rem; color: var(--text-leise); font-variant-numeric: tabular-nums; }
+.wl-wert { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.wl-warnung { color: var(--warnung-text); background: var(--warnung-hg); border-radius: 6px; padding: 0 6px; font-size: 0.8rem; font-weight: 600; }
+.wl-svg { display: block; width: 100%; height: 60px; margin-top: 6px; }
+.wl-news-titel { font-size: 0.8rem; color: var(--text-leise); margin-top: 6px; }
+.wl-news { margin: 2px 0 0; padding-left: 18px; font-size: 0.9rem; }
+.wl-news .titel { display: inline; font-weight: 400; }
+.watchlist-badge { background: var(--top-hg); color: var(--top-akzent); }
+.zaehler.warn { background: var(--warnung-hg); color: var(--warnung-text); }
+.watchlist-bearbeiten { margin: 16px 0; padding: 10px 12px; background: var(--flaeche); border-radius: 8px; }
+.watchlist-bearbeiten summary { cursor: pointer; font-weight: 600; }
+.watchlist-bearbeiten textarea { width: 100%; background: var(--hintergrund); color: var(--text); border: 1px solid var(--linie); border-radius: 6px; padding: 8px; font: 0.9rem/1.4 ui-monospace, Consolas, monospace; }
+.klein-hinweis { font-size: 0.82rem; color: var(--text-leise); }
+.klein-hinweis code { color: var(--text); }
+.knopf-zeile { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.knopf { background: var(--akzent); color: #1a1a1a; border: 0; border-radius: 6px; padding: 6px 14px; font: inherit; font-weight: 600; cursor: pointer; display: inline-block; }
+.knopf-leise { background: var(--badge-hg); color: var(--text); font-weight: 500; }
+.knopf:focus-visible, .knopf-leise:focus-within { outline: 2px solid var(--akzent); outline-offset: 2px; }
+.unsichtbar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

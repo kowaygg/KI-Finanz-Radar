@@ -1,6 +1,7 @@
 // KI-Finanz-Radar – Oberfläche. Feed-Inhalte werden ausschließlich per textContent eingefügt (kein innerHTML).
 import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wetterSymbol } from './zeit.js';
 import { veraenderung, kurveZeichnen, kursText, zeitBeschriftung, spanneText } from './diagramm.js';
+import { watchlistLesen, suchbegriffe, meldungTrifft } from './watchlist.js';
 
 const ZEITZONE = 'Europe/Berlin';
 const ALARM_NACH_MS = 3 * 60 * 60 * 1000;
@@ -88,6 +89,7 @@ function meldungElement(m, zuletztGesehen) {
   const zeit = element('time', 'zeit', zeitText(m.datum));
   zeit.dateTime = m.datum;
   meta.append(zeit, element('span', null, m.quelle), element('span', 'badge', m.kategorie));
+  watchlistBadge(meta, m);
   li.append(meta);
   li.append(titelLink(m, anzeigeTitel(m)));
 
@@ -133,6 +135,7 @@ function wichtigElement(m) {
     element('span', 'badge relevanz', `Relevanz ${ki.relevanz}/10`),
     element('span', `stimmung stimmung-${ki.stimmung}`, STIMMUNG[ki.stimmung] || ''),
   );
+  watchlistBadge(meta, m);
   li.append(meta);
   li.append(titelLink(m, anzeigeTitel(m)));
   const original = originalZeile(m);
@@ -361,8 +364,127 @@ function topNewsAnzeigen(meldungen) {
   }));
 }
 
+// ---------- Watchlist (nur auf diesem Gerät) ----------
+const SPEICHER_WATCHLIST = 'radar.watchlist';
+const STARKE_BEWEGUNG = 3;
+let watchlist = (() => { try { return watchlistLesen(speicherLesen(SPEICHER_WATCHLIST) || '[]').eintraege; } catch { return []; } })();
+let werteDaten = null;
+let letzteMeldungen = [];
+let watchlistBegriffe = [];
+const pctFormat = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'exceptZero' });
+
+function wertZu(eintrag) {
+  return werteDaten?.werte?.find((w) => w.isin === eintrag.isin) || null;
+}
+
+function watchlistBegriffeBerechnen() {
+  watchlistBegriffe = watchlist.map((e) => ({ eintrag: e, begriffe: suchbegriffe(e, wertZu(e)) }));
+}
+
+function watchlistBadge(meta, m) {
+  const treffer = watchlistBegriffe.filter((w) => meldungTrifft(m, w.begriffe)).map((w) => w.eintrag.name);
+  if (treffer.length) meta.append(element('span', 'badge watchlist-badge', `★ ${treffer.slice(0, 2).join(', ')}`));
+}
+
+function watchlistEintrag(e) {
+  const w = wertZu(e);
+  const li = element('li', 'meldung wl-eintrag');
+  const kopf = element('div', 'wl-kopf');
+  const name = element('div', 'wl-name');
+  name.append(element('strong', null, e.name), element('span', 'wl-isin', e.isin));
+  kopf.append(name);
+  li.append(kopf);
+  if (w && Number.isFinite(w.kurs)) {
+    const richtung = w.pct > 0 ? 'positiv' : w.pct < 0 ? 'negativ' : 'neutral';
+    const wert = element('div', 'wl-wert');
+    wert.append(
+      element('span', 'kurs-zahl', `${kursText(w.kurs)} ${w.waehrung}`),
+      element('span', `kurs-pct stimmung-${richtung}`, `${w.pct > 0 ? '▲' : w.pct < 0 ? '▼' : '●'} ${pctFormat.format(w.pct)} %`),
+    );
+    if (Math.abs(w.pct) > STARKE_BEWEGUNG) wert.append(element('span', 'wl-warnung', `⚠ starke Bewegung (über ${STARKE_BEWEGUNG} %)`));
+    kopf.append(wert);
+    if (w.verlauf?.length > 1) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.classList.add('wl-svg');
+      svg.setAttribute('aria-label', `${e.name}: Kursverlauf 1 Monat`);
+      const punkte = w.verlauf.map((k, i) => [i, k]);
+      const gesamt = punkte[punkte.length - 1][1] - punkte[0][1];
+      kurveZeichnen(svg, punkte, gesamt > 0 ? 'positiv' : gesamt < 0 ? 'negativ' : 'neutral', null, '1M');
+      const stand = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(w.stand));
+      li.append(svg, element('div', 'kurs-fuss', `Verlauf 1 Monat · Stand ${stand} · verzögert`));
+    }
+  } else {
+    li.append(element('p', 'hinweis', 'Kein Kurs verfügbar: Dieser Wert steht nicht in der öffentlichen Werteliste. Passende News werden trotzdem angezeigt.'));
+  }
+  const begriffe = watchlistBegriffe.find((b) => b.eintrag.isin === e.isin)?.begriffe || [];
+  const news = letzteMeldungen.filter((m) => meldungTrifft(m, begriffe)).slice(0, 3);
+  if (news.length) {
+    const ul = element('ul', 'wl-news');
+    for (const m of news) {
+      const item = element('li');
+      item.append(element('span', 'zeit', zeitText(m.datum)), ' ', titelLink(m, anzeigeTitel(m)));
+      ul.append(item);
+    }
+    li.append(element('div', 'wl-news-titel', 'Passende News:'), ul);
+  }
+  return li;
+}
+
+function watchlistAnzeigen() {
+  $('watchlist-leer').hidden = watchlist.length > 0;
+  $('liste-watchlist').replaceChildren(...watchlist.map(watchlistEintrag));
+
+  const mitKurs = watchlist.map((e) => ({ e, w: wertZu(e) })).filter((x) => Number.isFinite(x.w?.pct));
+  const stark = mitKurs.filter((x) => Math.abs(x.w.pct) > STARKE_BEWEGUNG);
+  $('zaehler-watchlist').hidden = stark.length === 0;
+  $('zaehler-watchlist').textContent = `⚠ ${stark.length}`;
+
+  // Kopfzeile „Watchlist heute“
+  const dd = $('watchlist-heute');
+  if (!watchlist.length) {
+    dd.className = 'leise';
+    dd.textContent = 'noch leer – im Reiter „Watchlist“ anlegen';
+    return;
+  }
+  dd.className = '';
+  const hoch = mitKurs.filter((x) => x.w.pct > 0).length;
+  const runter = mitKurs.filter((x) => x.w.pct < 0).length;
+  dd.replaceChildren(`${watchlist.length} Werte · `, element('span', 'stimmung-positiv', `▲ ${hoch}`), ' · ', element('span', 'stimmung-negativ', `▼ ${runter}`));
+  for (const x of stark) dd.append(' · ', element('strong', 'wl-warnung', `⚠ ${x.e.name} ${pctFormat.format(x.w.pct)} %`));
+}
+
+function watchlistAlsText() {
+  return watchlist.map((e) => `${e.name};${e.isin}`).join('\n');
+}
+
+function watchlistSpeichern(text) {
+  const { eintraege, fehler } = watchlistLesen(text);
+  watchlist = eintraege;
+  speicherSchreiben(SPEICHER_WATCHLIST, JSON.stringify(watchlist));
+  $('watchlist-text').value = watchlistAlsText();
+  $('watchlist-meldung').textContent = `${eintraege.length} Werte gespeichert (nur auf diesem Gerät).${fehler.length ? ` Nicht übernommen: ${fehler.join('; ')}` : ''}`;
+  watchlistBegriffeBerechnen();
+  laden();
+}
+
+function watchlistBearbeitenEinrichten() {
+  $('watchlist-text').value = watchlistAlsText();
+  $('watchlist-speichern').addEventListener('click', () => watchlistSpeichern($('watchlist-text').value));
+  $('watchlist-datei').addEventListener('change', async (ereignis) => {
+    const datei = ereignis.target.files?.[0];
+    if (!datei) return;
+    if (datei.size > 200000) { $('watchlist-meldung').textContent = 'Die Datei ist zu groß.'; return; }
+    watchlistSpeichern(await datei.text());
+    ereignis.target.value = '';
+  });
+  $('watchlist-loeschen').addEventListener('click', () => {
+    if (window.confirm('Die ganze Watchlist auf diesem Gerät löschen?')) watchlistSpeichern('');
+  });
+  $('watchlist-bearbeiten').open = watchlist.length === 0;
+}
+
 function reiterWechseln(ziel) {
-  for (const name of ['ticker', 'wichtig']) {
+  for (const name of ['ticker', 'wichtig', 'watchlist']) {
     const aktiv = name === ziel;
     $(`tab-${name}`).setAttribute('aria-selected', String(aktiv));
     $(`ansicht-${name}`).hidden = !aktiv;
@@ -386,6 +508,8 @@ async function laden() {
   try { daten = await jsonHolen('data/meldungen.json'); } catch { /* offline */ }
   try { kalender = await jsonHolen('data/kalender.json'); } catch { /* ohne Börsen/Termine weiter */ }
   try { maerkteAnzeigen(await jsonHolen('data/kurse.json')); } catch { /* ohne Diagramme weiter */ }
+  try { werteDaten = await jsonHolen('data/werte.json'); } catch { /* ohne Kurse für die Watchlist weiter */ }
+  watchlistBegriffeBerechnen();
 
   if (status?.version) $('version').textContent = `Version ${status.version}`;
   letzterStatus = status;
@@ -394,7 +518,9 @@ async function laden() {
   kopfTicken();
 
   const meldungen = Array.isArray(daten.meldungen) ? daten.meldungen : [];
+  letzteMeldungen = meldungen;
   topNewsAnzeigen(meldungen);
+  watchlistAnzeigen();
   const ticker = $('liste-ticker');
   ticker.replaceChildren(...meldungen.map((m) => meldungElement(m, zuletztGesehen)));
   if (!meldungen.length) ticker.append(element('li', 'leer', 'Noch keine Meldungen geladen.'));
@@ -420,6 +546,8 @@ async function laden() {
 
 $('tab-ticker').addEventListener('click', () => reiterWechseln('ticker'));
 $('tab-wichtig').addEventListener('click', () => reiterWechseln('wichtig'));
+$('tab-watchlist').addEventListener('click', () => reiterWechseln('watchlist'));
+watchlistBearbeitenEinrichten();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* ohne Offline-Modus weiter */ });

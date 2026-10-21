@@ -11,6 +11,7 @@ import { sichererLink } from './bereinigen.js';
 import { ketteErstellen } from './ki/kette.js';
 import { kiDurchlauf } from './ki/analyse.js';
 import { kurseHolen } from './kurse.js';
+import { werteHolen } from './werte.js';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -125,6 +126,17 @@ export async function abrufStarten() {
     const kurse = await kurseHolen(kursEinstellungen, letzteKurse, { userAgent: einstellungen.userAgent, jetzt });
     await jsonSchreiben(join(WURZEL, 'data', 'kurse.json'), kurse);
     await jsonSchreiben(join(AUSGABE, 'kurse.json'), { ...kurse, zeitraeume: kursEinstellungen.zeitraeume.map(({ schluessel, name }) => ({ schluessel, name })) });
+
+    // Öffentliche Werteliste (Variante B): die App sucht sich die Watchlist-Werte nur auf dem Gerät heraus.
+    const { werte: liste } = await jsonLesen(join(WURZEL, 'config', 'werteliste.json'), { werte: [] });
+    if (liste.length) {
+      const letzteWerte = await jsonLesen(join(WURZEL, 'data', 'werte.json'), null);
+      const werte = await werteHolen(liste, letzteWerte, {
+        adresse: kursEinstellungen.quelle.adresse.replace('/chart/', '/spark'), userAgent: einstellungen.userAgent, jetzt,
+      });
+      await jsonSchreiben(join(WURZEL, 'data', 'werte.json'), werte);
+      await jsonSchreiben(join(AUSGABE, 'werte.json'), werte);
+    }
   }
   const { boersen } = await jsonLesen(join(WURZEL, 'config', 'boersen.json'), { boersen: [] });
   const { termine } = await jsonLesen(join(WURZEL, 'config', 'termine.json'), { termine: [] });

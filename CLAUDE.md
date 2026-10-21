@@ -248,6 +248,9 @@ VORGEHEN
 - `scripts/` – `serve.js` (lokaler Test-Server localhost:8080), `make-icons.js`
 - `config/boersen.json` – Handelszeiten, Feiertage, Frühschluss (Xetra, NYSE; jährlich ergänzen) · `config/termine.json` – Termine (EZB/Fed …) für Kopfzeile/Kalender
 - `config/kurse.json` – Indizes (DAX ^GDAXI, S&P 500 ^GSPC) und Zeiträume 1T/1W/1M/1J/Max · `src/kurse.js` – holt Verläufe (Yahoo Chart), Rückfall auf letzten Stand in `data/kurse.json`
+- `config/werteliste.json` – ÖFFENTLICHE Werteliste (124 Werte: deutsche + US-Aktien, Europa/Asien-Großwerte, beliebte ETFs/ETC; Name, ISIN, Kürzel, Art) · `npm run werteliste-check` prüft Kürzel + ISIN
+- `src/werte.js` – Tageskurse + 1-Monats-Verlauf der Werteliste (Spark-Sammelabfrage, 20 pro Anfrage), Rückfall je Wert auf letzten Stand → `public/data/werte.json`
+- `public/watchlist.js` – ISIN-Prüfziffer, Import (nur Name + ISIN, alles andere wird verworfen), News-Zuordnung (Aktie: Name, ETF: Index)
 - `public/diagramm.js` – SVG-Kurven, Veränderung (1T ggü. Vortag, sonst ggü. Startwert), Achsentexte
 - `public/zeit.js` – Kalenderwoche, Börsenstatus, Countdown, Wettersymbol (ES-Modul, getestet)
 - `config/ki.json` – KI-Kette (Reihenfolge, Modelle, Bündelgrößen, Limits pro Lauf); Schlüsselnamen nur als Variablennamen
@@ -269,7 +272,9 @@ VORGEHEN
 - M1 (0.1.0), M2 (0.2.0) und M3 fertig (21.10.2026): online unter https://kowaygg.github.io/KI-Finanz-Radar/ – Abruf alle 15 Min. per GitHub Actions; erster Lauf erfolgreich (10/10 Quellen, Gemini aktiv)
 - Kopfzeile (0.3.0) vorgezogen: Wochentag, Datum, KW, Uhr mit Sekunden, Börsen nach Land gruppiert (Deutschland: Xetra + Börse Frankfurt 8–22 Uhr; USA: NYSE + Nasdaq) mit Countdown + Feiertagen, Wetter Freiburg (Open-Meteo, beim Abruf geholt → status.json), nächster Termin, Zähler neue wichtige Meldungen, Stand; Handy: Rest unter „Mehr anzeigen“. Darunter Kasten „Top-News der letzten 24 Stunden“ (warmes Lila #d59bf6, 3 höchste KI-Relevanzen, ohne Dubletten). App lädt alle 5 Min. und beim Zurückkehren neu (Neu-Markierung bleibt pro Sitzung). Über den Top-News (0.4.0): zwei Kurven-Diagramme DAX + S&P 500 nebeneinander (Handy untereinander) mit Zeitraum 1T/1W/1M/1J/Max (Auswahl wird gemerkt), Kurs + Veränderung ▲/▼, Tief/Hoch, Finger/Maus zeigt Kurs am Zeitpunkt; Marktstimmung in der Kopfzeile aus Tagesveränderung DAX + S&P 500. Noch offen: Watchlist heute (M4), Ausweich-Kursquelle (M4), Design-Umschalter (M7)
 - 0.4.0 online (21.10.2026 abends geprüft): Kurse laden von GitHub aus, KI-Kette greift (3.8 Flash 429 → 3.5 Flash-Lite). Geplante Läufe real ca. alle 35–50 Min. (GitHub-Verzögerung)
-- Als Nächstes: M4 (Watchlist, Ausweich-Kursquelle)
+- 0.5.0 (M4 Teil 1): Reiter „Watchlist“ – Werte nur in localStorage (`radar.watchlist`), Eingabe „Name;ISIN“ oder Datei-Import, Kurs + Tagesveränderung ▲/▼, ⚠ bei über 3 %, Monatsverlauf, passende News; Kopfzeile „Watchlist heute“; ★-Markierung bei passenden Meldungen. Werte ohne Kurs (nicht in Werteliste) → nur News
+- Offen in M4: Ausweich-Kursquelle; Alexanders echte Watchlist eingeben (lokale Datei watchlist.local.json → in der App importieren; fehlende Werte nur mit OK in die öffentliche Liste)
+- Roche aus der Werteliste genommen (Kürzel zur ISIN CH0012032048 unklar)
 - Dependabot hat einen PR für eine Action-Aktualisierung geöffnet → bei der monatlichen Wartung prüfen (nicht ungeprüft übernehmen)
 - Mistral-/OpenRouter-Konten noch nicht angelegt (Kette: Gemini → Groq)
 - Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen
