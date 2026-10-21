@@ -255,3 +255,36 @@ main { padding-bottom: 8px; }
 }
 .termin-text { grid-column: 1 / -1; font-size: 0.85rem; color: var(--text-leise); }
 @media (min-width: 700px) { .termin-text { grid-column: 2 / -1; } }
+
+/* ---------- Zinsen ---------- */
+.leitzins-leiste { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--abstand); }
+.leitzins { background: var(--flaeche); border: 1px solid var(--linie); border-radius: var(--radius); padding: 10px 12px; }
+.leitzins-titel { font-size: 0.78rem; color: var(--text-leise); font-weight: 600; }
+.leitzins-wert { font-size: 1.3rem; font-weight: 700; color: var(--akzent); font-variant-numeric: tabular-nums; }
+.leitzins-unter { font-size: 0.75rem; color: var(--text-leise); }
+.unterreiter { display: inline-flex; margin: 16px 0 4px; border: 1px solid var(--rand); border-radius: 8px; overflow: hidden; }
+.unterreiter .zeitraum { padding: 6px 14px; font-size: 0.88rem; }
+.tabelle-huelle { overflow-x: auto; border: 1px solid var(--linie); border-radius: var(--radius); background: var(--flaeche); }
+.tabelle { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.tabelle th, .tabelle td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--linie); }
+.tabelle thead th { border-top: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-leise); background: var(--flaeche-hoch); }
+.tabelle .zahl { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabelle td.zahl:nth-child(2) { color: var(--akzent); font-weight: 700; }
+.zinsen-liste { margin: 0; padding-left: 20px; }
+.zins-karte { margin-bottom: var(--abstand); }
+.zins-karte-titel { margin: 0 0 6px; font-size: 1rem; }
+.zins-werte { margin: 0; display: grid; }
+.zins-werte > div { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; padding: 6px 0; border-top: 1px solid var(--linie); }
+.zins-werte > div:first-child { border-top: 0; }
+.zins-werte dd { margin: 0; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.zins-werte dd.klein-quelle { grid-column: 1 / -1; text-align: left; font-weight: 400; font-size: 0.75rem; }
+.zinsen-quellen { margin: 8px 0 16px; font-size: 0.85rem; color: var(--text-leise); }
+.zinsen-quellen summary { cursor: pointer; }
+.zinsen-quellen a { color: var(--text-leise); }
+@media (max-width: 699px) {
+  .leitzins-leiste { grid-template-columns: 1fr 1fr; }
+  .leitzins:last-child { grid-column: 1 / -1; }
+  .tabelle th, .tabelle td { padding: 7px 8px; }
+  .tabelle .nur-gross, .tabelle th:last-child.nur-gross { display: none; }
+  .reiter > button, .reiter-gruppe button { font-size: 0.66rem; }
+}

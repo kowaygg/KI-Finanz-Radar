@@ -252,6 +252,115 @@ function kopfTicken() {
 }
 
 
+// ---------- Reiter „Zinsen“ ----------
+const SPEICHER_BEREICH = 'radar.zinsenBereich';
+let zinsDaten = null;
+let zinsBereich = speicherLesen(SPEICHER_BEREICH) || 'tagesgeld';
+const prozentFormat = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const prozent = (wert) => (Number.isFinite(wert) ? `${prozentFormat.format(wert)} %` : '–');
+const datumKurz = (iso) => (iso ? new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(iso)) : '');
+
+function naechsterEntscheid(muster) {
+  const t = (kalender.termine || []).find((x) => x.art === 'Zinsentscheid' && muster.test(x.titel) && Date.parse(x.zeit) > Date.now());
+  return t ? `Nächster Entscheid: ${fmtTerminTag.format(new Date(t.zeit))}` : '';
+}
+
+function leitzinsKarte(titel, wert, unter) {
+  const karte = element('div', 'leitzins');
+  karte.append(element('div', 'leitzins-titel', titel), element('div', 'leitzins-wert', wert));
+  if (unter) karte.append(element('div', 'leitzins-unter', unter));
+  return karte;
+}
+
+function tabelle(kopf, zeilen) {
+  const t = element('table', 'tabelle');
+  const thead = element('thead');
+  const tr = element('tr');
+  for (const k of kopf) tr.append(element('th', k.klasse || null, k.text));
+  thead.append(tr);
+  const tbody = element('tbody');
+  for (const zeile of zeilen) {
+    const z = element('tr');
+    zeile.forEach((zelle, i) => z.append(element('td', kopf[i].klasse || null, zelle)));
+    tbody.append(z);
+  }
+  t.append(thead, tbody);
+  const huelle = element('div', 'tabelle-huelle');
+  huelle.append(t);
+  return huelle;
+}
+
+function zinsenAnzeigen() {
+  const d = zinsDaten;
+  if (!d) return;
+  const l = d.leitzinsen || {};
+  $('leitzinsen').replaceChildren(
+    leitzinsKarte('EZB-Einlagensatz', prozent(l.ezb?.einlagen), naechsterEntscheid(/EZB/)),
+    leitzinsKarte('EZB-Hauptrefinanzierung', prozent(l.ezb?.hauptrefi), l.ezb?.stand ? `Stand ${datumKurz(l.ezb.stand)}` : ''),
+    leitzinsKarte('Fed-Zielspanne (USA)', Number.isFinite(l.fed?.von) ? `${prozentFormat.format(l.fed.von)}–${prozent(l.fed.bis)}` : '–', naechsterEntscheid(/Fed/)),
+  );
+  for (const k of document.querySelectorAll('.unterreiter .zeitraum')) k.setAttribute('aria-pressed', String(k.dataset.bereich === zinsBereich));
+
+  const inhalt = [];
+  if (zinsBereich === 'tagesgeld') {
+    inhalt.push(element('h2', 'abschnitt', 'Tagesgeld – Neukunden'));
+    inhalt.push(tabelle(
+      [{ text: 'Bank' }, { text: 'Zins', klasse: 'zahl' }, { text: 'gilt' }, { text: 'danach', klasse: 'zahl' }, { text: 'Einlagen­sicherung', klasse: 'nur-gross' }],
+      (d.tagesgeldNeukunden || []).map((b) => [b.bank, prozent(b.zins), b.dauer, Number.isFinite(b.danach) ? prozent(b.danach) : '–', b.sicherung]),
+    ));
+    inhalt.push(element('h2', 'abschnitt', 'Tagesgeld – Bestandskunden (Dauerzins)'));
+    inhalt.push(tabelle(
+      [{ text: 'Bank' }, { text: 'Zins', klasse: 'zahl' }, { text: 'Einlagen­sicherung' }],
+      (d.tagesgeldBestandskunden || []).map((b) => [b.bank, prozent(b.zins), b.sicherung]),
+    ));
+    if (d.angekuendigt?.length) {
+      inhalt.push(element('h2', 'abschnitt', 'Angekündigt'));
+      const ul = element('ul', 'zinsen-liste');
+      for (const a of d.angekuendigt) ul.append(element('li', null, a.text));
+      inhalt.push(ul);
+    }
+  } else if (zinsBereich === 'kredite') {
+    for (const k of d.kredite || []) {
+      const karte = element('section', 'kurs-karte zins-karte');
+      karte.append(element('h3', 'zins-karte-titel', k.art));
+      const dl = element('dl', 'zins-werte');
+      for (const w of k.werte) {
+        const zeile = element('div');
+        zeile.append(element('dt', null, w.label), element('dd', null, w.wert), element('dd', 'leise klein-quelle', w.quelle));
+        dl.append(zeile);
+      }
+      karte.append(dl);
+      if (k.hinweis) karte.append(element('p', 'klein-hinweis', k.hinweis));
+      inhalt.push(karte);
+    }
+  } else {
+    const muster = /(?<![\p{L}])(bank|banken|sparkasse|zins|zinsen|leitzins|ezb|fed|tagesgeld|kredit|hypothek|bafin|einlagen)/iu;
+    const news = letzteMeldungen.filter((m) => m.kategorie === 'Finanzen & Vorsorge' || muster.test(`${m.titel} ${m.titelDe || ''}`)).slice(0, 15);
+    const liste = element('ol', 'liste');
+    liste.append(...news.map((m) => meldungElement(m, zuletztGesehen)));
+    inhalt.push(news.length ? liste : element('p', 'leer', 'Gerade keine Banken- und Zins-News.'));
+  }
+  $('zinsen-inhalt').replaceChildren(...inhalt);
+  $('zinsen-hinweis').textContent = zinsBereich === 'news' ? 'Aus den laufenden Meldungen: Banken, Zinsen, Notenbanken, Finanzen & Vorsorge.'
+    : `Stand Konditionen: ${datumKurz(d.stand)} · Leitzinsen täglich automatisch (EZB, New York Fed). ${d.hinweis || ''} Keine Anlageberatung.`;
+  $('zinsen-quellen').replaceChildren(...(d.quellen || []).map((q) => {
+    const li = element('li');
+    const link = sichererLink(q.url);
+    if (link) { const a = element('a', null, q.name); a.href = link; a.target = '_blank'; a.rel = 'noopener noreferrer'; li.append(a); } else li.append(q.name);
+    return li;
+  }));
+}
+
+function zinsenEinrichten() {
+  for (const k of document.querySelectorAll('.unterreiter .zeitraum')) {
+    k.addEventListener('click', () => {
+      zinsBereich = k.dataset.bereich;
+      speicherSchreiben(SPEICHER_BEREICH, zinsBereich);
+      zinsenAnzeigen();
+    });
+  }
+}
+
 // ---------- Reiter „Termine“ ----------
 const fmtTerminTag = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, weekday: 'short', day: '2-digit', month: '2-digit' });
 const fmtMonat = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, month: 'long', year: 'numeric' });
@@ -535,7 +644,7 @@ function watchlistBearbeitenEinrichten() {
 }
 
 function reiterWechseln(ziel) {
-  for (const name of ['ticker', 'wichtig', 'watchlist', 'kurse', 'boersen', 'termine']) {
+  for (const name of ['ticker', 'wichtig', 'watchlist', 'kurse', 'zinsen', 'boersen', 'termine']) {
     const aktiv = name === ziel;
     $(`tab-${name}`).setAttribute('aria-selected', String(aktiv));
     $(`ansicht-${name}`).hidden = !aktiv;
@@ -559,6 +668,7 @@ async function laden() {
   try { daten = await jsonHolen('data/meldungen.json'); } catch { /* offline */ }
   try { kalender = await jsonHolen('data/kalender.json'); } catch { /* ohne Börsen/Termine weiter */ }
   try { maerkteAnzeigen(await jsonHolen('data/kurse.json')); } catch { /* ohne Diagramme weiter */ }
+  try { zinsDaten = await jsonHolen('data/zinsen.json'); } catch { /* ohne Zinsen weiter */ }
   try { werteDaten = await jsonHolen('data/werte.json'); } catch { /* ohne Kurse für die Watchlist weiter */ }
   watchlistBegriffeBerechnen();
 
@@ -573,6 +683,7 @@ async function laden() {
   topNewsAnzeigen(meldungen);
   watchlistAnzeigen();
   kurseWatchlistAnzeigen();
+  zinsenAnzeigen();
   const ticker = $('liste-ticker');
   ticker.replaceChildren(...meldungen.map((m) => meldungElement(m, zuletztGesehen)));
   if (!meldungen.length) ticker.append(element('li', 'leer', 'Noch keine Meldungen geladen.'));
@@ -602,6 +713,8 @@ $('tab-watchlist').addEventListener('click', () => reiterWechseln('watchlist'));
 $('tab-kurse').addEventListener('click', () => reiterWechseln('kurse'));
 $('tab-boersen').addEventListener('click', () => reiterWechseln('boersen'));
 $('tab-termine').addEventListener('click', () => reiterWechseln('termine'));
+$('tab-zinsen').addEventListener('click', () => reiterWechseln('zinsen'));
+zinsenEinrichten();
 watchlistBearbeitenEinrichten();
 
 if ('serviceWorker' in navigator) {

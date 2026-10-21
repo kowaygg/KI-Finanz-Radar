@@ -45,6 +45,7 @@
     </div>
     <button role="tab" id="tab-watchlist" aria-controls="ansicht-watchlist" aria-selected="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Watchlist</span> <span id="zaehler-watchlist" class="zaehler warn" hidden></span></button>
     <button role="tab" id="tab-kurse" aria-controls="ansicht-kurse" aria-selected="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span>Kurse</span></button>
+    <button role="tab" id="tab-zinsen" aria-controls="ansicht-zinsen" aria-selected="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg><span>Zinsen</span></button>
     <button role="tab" id="tab-boersen" aria-controls="ansicht-boersen" aria-selected="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Börsen</span></button>
     <button role="tab" id="tab-termine" aria-controls="ansicht-termine" aria-selected="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Termine</span></button>
   </nav>
@@ -82,6 +83,18 @@
       <div id="kurse-watchlist" class="maerkte"></div>
       <p id="kurse-watchlist-leer" class="leer" hidden>Hier erscheinen die Kurven deiner Watchlist-Werte – Werte im Reiter „Watchlist“ eintragen.</p>
       <p id="kurse-ohne-daten" class="klein-hinweis" hidden></p>
+    </section>
+    <section id="ansicht-zinsen" role="tabpanel" aria-labelledby="tab-zinsen" hidden>
+      <h2 class="abschnitt">Leitzinsen</h2>
+      <div id="leitzinsen" class="leitzins-leiste"></div>
+      <div class="unterreiter" role="group" aria-label="Bereich">
+        <button type="button" class="zeitraum" data-bereich="tagesgeld" aria-pressed="true">Tagesgeld</button>
+        <button type="button" class="zeitraum" data-bereich="kredite" aria-pressed="false">Kredite</button>
+        <button type="button" class="zeitraum" data-bereich="news" aria-pressed="false">Banken-News</button>
+      </div>
+      <div id="zinsen-inhalt"></div>
+      <p id="zinsen-hinweis" class="klein-hinweis"></p>
+      <details class="zinsen-quellen"><summary>Quellen</summary><ul id="zinsen-quellen"></ul></details>
     </section>
     <section id="ansicht-boersen" role="tabpanel" aria-labelledby="tab-boersen" hidden>
       <div id="boersen" class="boersen-tafel"></div>

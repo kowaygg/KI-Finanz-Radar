@@ -12,6 +12,7 @@ import { ketteErstellen } from './ki/kette.js';
 import { kiDurchlauf } from './ki/analyse.js';
 import { kurseHolen } from './kurse.js';
 import { werteHolen, verlaeufeHolen, verlaufDatei } from './werte.js';
+import { leitzinsenHolen } from './zinsen.js';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -122,6 +123,16 @@ export async function abrufStarten() {
       }
     }
   }
+  // Zinsen: Leitzinsen automatisch (EZB, NY Fed), Tagesgeld/Kredite aus der gepflegten Datei.
+  const zinsEinstellungen = await jsonLesen(join(WURZEL, 'config', 'zinsen.json'), null);
+  if (zinsEinstellungen) {
+    const letzteLeitzinsen = await jsonLesen(join(WURZEL, 'data', 'leitzinsen.json'), null);
+    const leitzinsen = await leitzinsenHolen(zinsEinstellungen.leitzinsen, letzteLeitzinsen, { userAgent: einstellungen.userAgent });
+    await jsonSchreiben(join(WURZEL, 'data', 'leitzinsen.json'), leitzinsen);
+    const { leitzinsen: _adressen, _anleitung, ...rest } = zinsEinstellungen;
+    await jsonSchreiben(join(AUSGABE, 'zinsen.json'), { ...rest, leitzinsen });
+  }
+
   const { boersen, _hinweis: boersenHinweis } = await jsonLesen(join(WURZEL, 'config', 'boersen.json'), { boersen: [] });
   const { termine } = await jsonLesen(join(WURZEL, 'config', 'termine.json'), { termine: [] });
   await jsonSchreiben(join(AUSGABE, 'kalender.json'), {

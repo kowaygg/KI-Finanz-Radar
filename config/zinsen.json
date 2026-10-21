@@ -1,0 +1,47 @@
+{
+  "_anleitung": "Konditionen für den Reiter „Zinsen“. Tagesgeld und Kredite werden von Hand gepflegt (keine kostenlose, erlaubte Schnittstelle) – bei jeder Monatswartung prüfen und 'stand' anpassen. Leitzinsen kommen automatisch von EZB und New York Fed. Nur Information, keine Empfehlung.",
+  "stand": "2026-10-21",
+  "hinweis": "Konditionen ändern sich oft – vor Kontoeröffnung immer direkt bei der Bank prüfen. Einlagensicherung: in der EU bis 100.000 € je Bank und Kunde.",
+  "leitzinsen": {
+    "ezbAdresse": "https://data-api.ecb.europa.eu/service/data/FM/D.U2.EUR.4F.KR.{reihe}.LEV?lastNObservations=1&format=jsondata",
+    "fedAdresse": "https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1.json"
+  },
+  "tagesgeldNeukunden": [
+    { "bank": "Bigbank", "zins": 4.15, "dauer": "4 Monate", "danach": 2.25, "sicherung": "Estland" },
+    { "bank": "Chase", "zins": 4.00, "dauer": "4 Monate", "danach": 2.00, "sicherung": "Deutschland" },
+    { "bank": "Consorsbank", "zins": 3.80, "dauer": "5 Monate", "danach": 1.00, "sicherung": "Deutschland" },
+    { "bank": "ING (mit Girokonto)", "zins": 3.75, "dauer": "4 Monate", "danach": 0.75, "sicherung": "Deutschland" },
+    { "bank": "comdirect (mit Girokonto)", "zins": 3.25, "dauer": "befristet", "danach": null, "sicherung": "Deutschland" },
+    { "bank": "Scalable Capital", "zins": 2.60, "dauer": "unbefristet", "danach": null, "sicherung": "Deutschland" },
+    { "bank": "Trade Republic", "zins": 2.50, "dauer": "unbefristet", "danach": null, "sicherung": "Deutschland" }
+  ],
+  "tagesgeldBestandskunden": [
+    { "bank": "Ferratum", "zins": 3.00, "sicherung": "Malta" },
+    { "bank": "Ascory Bank", "zins": 2.75, "sicherung": "Deutschland" },
+    { "bank": "DKB", "zins": 1.00, "sicherung": "Deutschland" }
+  ],
+  "angekuendigt": [
+    { "text": "DKB: 4,00 % Aktionszins ab 01.11.2026 für 4 Monate – nur für Einzahlungen vom 06.–20.10.2026 (Anmeldezeit vorbei), danach 1,00 %." }
+  ],
+  "kredite": [
+    { "art": "Ratenkredit", "werte": [
+      { "label": "Durchschnitt (effektiv)", "wert": "6,20 %", "quelle": "Verivox, 18.09.2026" },
+      { "label": "Für die meisten Kunden realistisch", "wert": "ca. 3,0–3,5 %", "quelle": "Capitalo, 10/2026" },
+      { "label": "Werbezins (nur Top-Bonität)", "wert": "ab 0,68 %", "quelle": "Capitalo, 10/2026" }
+    ], "hinweis": "Der Zins hängt stark von Bonität, Betrag und Laufzeit ab; entscheidend ist der Zins, den 2 von 3 Kunden bekommen (2/3-Zins)." },
+    { "art": "Baufinanzierung, 10 Jahre fest", "werte": [
+      { "label": "Top-Zins (effektiv)", "wert": "ca. 4,1 %", "quelle": "Dr. Klein, 10/2026" },
+      { "label": "Marktüblich", "wert": "ca. 4,4–4,5 %", "quelle": "Interhyp 4,42 %, Sparkasse 4,45 %" }
+    ], "hinweis": "Abhängig von Beleihung (Eigenkapital), Tilgung und Darlehenshöhe." }
+  ],
+  "quellen": [
+    { "name": "neuebanken.de Tagesgeld-Vergleich", "url": "https://www.neuebanken.de/tagesgeld-zinsen-vergleich/" },
+    { "name": "Handelsblatt Tagesgeld-Vergleich", "url": "https://www.handelsblatt.com/vergleich/tagesgeld-vergleich/" },
+    { "name": "biallo Tagesgeld", "url": "https://www.biallo.de/vergleiche/tagesgeld/" },
+    { "name": "Verivox Tagesgeld", "url": "https://www.verivox.de/tagesgeld/" },
+    { "name": "Verivox Kreditzinsen", "url": "https://www.verivox.de/darlehen/zinsen/" },
+    { "name": "Capitalo Kredit", "url": "https://www.capitalo.de/kredit/guenstig" },
+    { "name": "Dr. Klein Bauzinsen", "url": "https://www.drklein.de/aktuelle-bauzinsen.html" },
+    { "name": "Interhyp Zinsen", "url": "https://www.interhyp.de/zinsen/" }
+  ]
+}
