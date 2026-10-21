@@ -53,7 +53,8 @@ test('Vorfilter: Werbung wird nie veröffentlicht, ohneKi bekommt keinen Teaser'
   assert.equal(nachTitel['Fußball: Bayern gewinnt'].teaser, '');
   assert.equal(nachTitel['Inflation sinkt'].teaser, 'Teaser');
   const oeffentlich = oeffentlicheMeldungen(meldungen);
-  assert.equal(oeffentlich.length, 2);
+  // Seit 21.10.2026 strenger: auch Sport/Lifestyle (ohneKi) erscheint nicht mehr im Live-Ticker.
+  assert.equal(oeffentlich.length, 1);
   assert.ok(oeffentlich.every((m) => !('teaser' in m) && !('vorfilter' in m)));
 });
 
@@ -79,4 +80,21 @@ test('Vorfilter sucht ganze Wörter (keine Teilwort-Treffer)', () => {
   const einstufenTest = vorfilterErstellen({ werbung: ['deal'], ohneKi: [] });
   assert.equal(einstufenTest('Neuer Deal mit Rabatt'), 'werbung');
   assert.equal(einstufenTest('Dealer-Netzwerk wächst'), 'ok');
+});
+
+import { sichtbar } from '../src/sammeln.js';
+
+test('Strenge Kontrolle: Ratgeber, Unterhaltung, ohne Marktbezug und Unwichtiges erscheinen nicht', () => {
+  const basis = { vorfilter: 'ok' };
+  const ki = (x) => ({ ...basis, ki: { relevanz: 6, art: 'nachricht', passt: true, ...x } });
+  assert.equal(sichtbar(basis), true, 'noch nicht bewertet → sichtbar');
+  assert.equal(sichtbar(ki({})), true);
+  assert.equal(sichtbar(ki({ art: 'ratgeber' })), false, 'Sportwetten-Spartipp');
+  assert.equal(sichtbar(ki({ art: 'unterhaltung' })), false);
+  assert.equal(sichtbar(ki({ passt: false })), false);
+  assert.equal(sichtbar(ki({ relevanz: 2 })), false);
+  assert.equal(sichtbar(ki({ art: 'meinung', relevanz: 4 })), false);
+  assert.equal(sichtbar(ki({ art: 'meinung', relevanz: 6 })), true);
+  assert.equal(sichtbar({ vorfilter: 'ohneKi' }), false);
+  assert.equal(sichtbar(ki({ relevanz: 3 }), { mindestRelevanz: 4 }), false);
 });

@@ -35,7 +35,7 @@ test('Bewertungen: falsche Kategorie oder Kommazahl wird verworfen, Clickbait/Ge
     ],
   }, ids);
   assert.equal(ergebnis.has('a'), false);
-  assert.equal(ergebnis.get('b').relevanz, 3);
+  assert.equal(ergebnis.get('b').relevanz, 4);
 });
 
 test('Analysen: zu wenig Stichpunkte oder ungültige Einschätzung werden verworfen', () => {
@@ -205,4 +205,16 @@ test('Durchlauf: alle Dienste am Limit → Meldungen bleiben offen und werden sp
   assert.equal(bericht.abgebrochen, true);
   assert.equal(bericht.offen, 1);
   assert.equal(meldungen[0].teaser, 't');
+});
+
+test('Bewertung: Art und Themenbezug; Ratgeber/ohne Marktbezug höchstens Relevanz 2', () => {
+  const r = bewertungenPruefen({ bewertungen: [
+    { id: 'a', relevanz: 6, kategorie: 'Börse', stimmung: 'neutral', art: 'ratgeber', passt: true },
+    { id: 'b', relevanz: 7, kategorie: 'KI', stimmung: 'positiv', art: 'quatsch' },
+  ] }, ids);
+  assert.equal(r.get('a').relevanz, 2);
+  assert.equal(r.get('a').art, 'ratgeber');
+  assert.equal(r.get('b').art, 'nachricht');
+  assert.equal(r.get('b').passt, true);
+  assert.equal(r.get('b').relevanz, 7);
 });

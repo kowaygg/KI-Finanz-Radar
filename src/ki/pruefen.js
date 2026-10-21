@@ -2,7 +2,7 @@
 // Ungültige Einträge werden verworfen (die Meldung wird beim nächsten Lauf erneut bewertet).
 
 import { reinerText } from '../bereinigen.js';
-import { KATEGORIEN, STIMMUNGEN, ZEITHORIZONTE, SICHERHEITEN } from './anweisungen.js';
+import { KATEGORIEN, STIMMUNGEN, ZEITHORIZONTE, SICHERHEITEN, ARTEN } from './anweisungen.js';
 
 // Holt das JSON-Objekt aus der Antwort, auch wenn ein Modell Text oder ```json drumherum schreibt.
 export function jsonAusText(text) {
@@ -28,9 +28,15 @@ export function bewertungenPruefen(antwort, erlaubteIds) {
     if (!Number.isInteger(relevanz) || relevanz < 1 || relevanz > 10 || !kategorie || !stimmung) continue;
     const clickbait = b.clickbait === true;
     const geruecht = b.geruecht === true;
+    const art = aus(b.art, ARTEN) || 'nachricht';
+    const passt = b.passt !== false;
+    const ohneSubstanz = clickbait || !passt || art === 'ratgeber' || art === 'unterhaltung';
     ergebnis.set(b.id, {
-      // Clickbait und Gerüchte ohne Quelle landen nie im Reiter „Wichtig“.
-      relevanz: clickbait || geruecht ? Math.min(relevanz, 3) : relevanz,
+      // Clickbait, Ratgeber/Unterhaltung und Themen ohne Marktbezug: aus Live und „Wichtig“ raus (max. 2).
+      // Gerüchte bleiben im Live-Ticker sichtbar, kommen aber nie in „Wichtig“ (max. 4).
+      relevanz: ohneSubstanz ? Math.min(relevanz, 2) : geruecht ? Math.min(relevanz, 4) : relevanz,
+      art,
+      passt,
       kategorie,
       schlagwoerter: liste(b.schlagwoerter, 5, 40),
       stimmung,

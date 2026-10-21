@@ -55,9 +55,21 @@ export function alteLoeschen(meldungen, aufbewahrungTage, jetzt) {
 }
 
 // Nur diese Felder werden veröffentlicht – kein Teaser, keine Werbung.
-export function oeffentlicheMeldungen(meldungen) {
+// Strenge Kontrolle für die App (auch den Live-Ticker): Werbung, Sport/Lifestyle (Vorfilter) und alles,
+// was die KI als ohne Marktbezug, Ratgeber/Unterhaltung oder zu unwichtig erkannt hat, wird nicht veröffentlicht.
+// Meinungsbeiträge nur, wenn sie wirklich relevant sind. Noch nicht bewertete Meldungen bleiben sichtbar.
+export function sichtbar(m, { mindestRelevanz = 3, meinungAb = 5 } = {}) {
+  if (m.vorfilter !== 'ok') return false;
+  const ki = m.ki;
+  if (!ki) return true;
+  if (ki.passt === false || ki.clickbait || ki.art === 'ratgeber' || ki.art === 'unterhaltung') return false;
+  if (ki.art === 'meinung' && ki.relevanz < meinungAb) return false;
+  return ki.relevanz >= mindestRelevanz;
+}
+
+export function oeffentlicheMeldungen(meldungen, filter = {}) {
   return meldungen
-    .filter((m) => m.vorfilter !== 'werbung')
+    .filter((m) => sichtbar(m, filter))
     .sort((a, b) => Date.parse(b.datum) - Date.parse(a.datum))
     .map(({ id, titel, titelDe, link, quelle, kategorie, sprache, datum, gefunden, quellen, ki }) => ({
       id, titel, titelDe: titelDe || null, link, quelle, kategorie, sprache, datum, gefunden, quellen, ki,

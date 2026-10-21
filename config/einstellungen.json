@@ -8,5 +8,8 @@
   "aufbewahrungTage": 30,
   "relevanzSchwelle": 7,
   "dublettenAehnlichkeit": 0.6,
-  "dublettenZeitfensterStunden": 36
+  "dublettenZeitfensterStunden": 36,
+  "_filter": "Strenge Kontrolle: im Live-Ticker nur Meldungen mit KI-Relevanz ab liveMindestRelevanz; Ratgeber, Unterhaltung, Themen ohne Marktbezug und Werbung nie; Meinungsbeiträge erst ab meinungMindestRelevanz.",
+  "liveMindestRelevanz": 3,
+  "meinungMindestRelevanz": 5
 }

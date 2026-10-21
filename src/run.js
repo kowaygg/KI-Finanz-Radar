@@ -131,7 +131,7 @@ export async function abrufStarten() {
   });
 
   await jsonSchreiben(ZUSTAND, zustand);
-  await jsonSchreiben(join(AUSGABE, 'meldungen.json'), { erstellt: jetzt.toISOString(), meldungen: oeffentlicheMeldungen(zustand.meldungen) });
+  await jsonSchreiben(join(AUSGABE, 'meldungen.json'), { erstellt: jetzt.toISOString(), meldungen: oeffentlicheMeldungen(zustand.meldungen, { mindestRelevanz: einstellungen.liveMindestRelevanz ?? 3, meinungAb: einstellungen.meinungMindestRelevanz ?? 5 }) });
   await jsonSchreiben(join(AUSGABE, 'status.json'), {
     version,
     letzterAbruf: jetzt.toISOString(),
