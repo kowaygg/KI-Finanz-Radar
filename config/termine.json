@@ -1,12 +1,19 @@
 {
-  "_anleitung": "Wichtige Termine für die Kopfzeile (später auch Kalender). Neuer Termin: Zeile kopieren, Datum/Uhrzeit mit Zeitzone (+01:00 Winterzeit, +02:00 Sommerzeit in Deutschland) und Titel anpassen. Vergangene Termine werden automatisch ausgeblendet.",
-  "_quellen": "EZB: Sitzungskalender ecb.europa.eu (Entscheid 14:15 MEZ). Fed: FOMC-Kalender federalreserve.gov (Entscheid 14:00 Ortszeit New York). Geprüft 21.10.2026.",
+  "_anleitung": "Wichtige Termine für den Reiter „Termine“. Neuer Termin: Zeile kopieren, Zeit mit Zeitzone der Quelle angeben (Deutschland +01:00 Winter / +02:00 Sommer, New York -05:00 Winter / -04:00 Sommer), Titel, Art (Zinsentscheid, Konjunktur, Quartalszahlen …), Land, status 'bestätigt' oder 'erwartet'. Vergangene Termine werden automatisch ausgeblendet.",
+  "_quellen": "EZB: ecb.europa.eu Sitzungskalender (14:15 MEZ). Fed: FOMC-Kalender (14:00 New York). US-Arbeitsmarkt/CPI: bls.gov Schedule 2026 (Dezember vorläufig). ifo: ifo.de (10:00 über Ticker). Nvidia: Quartalszahlen erwartet laut Wall Street Horizon/MarketBeat (nicht bestätigt). Geprüft 21.10.2026.",
   "termine": [
-    { "zeit": "2026-10-28T14:00:00-04:00", "titel": "Fed-Zinsentscheid" },
-    { "zeit": "2026-10-29T14:15:00+01:00", "titel": "EZB-Zinsentscheid" },
-    { "zeit": "2026-12-09T14:00:00-05:00", "titel": "Fed-Zinsentscheid" },
-    { "zeit": "2026-12-17T14:15:00+01:00", "titel": "EZB-Zinsentscheid" },
-    { "zeit": "2027-02-04T14:15:00+01:00", "titel": "EZB-Zinsentscheid" },
-    { "zeit": "2027-03-18T14:15:00+01:00", "titel": "EZB-Zinsentscheid" }
+    { "zeit": "2026-10-26T10:00:00+01:00", "titel": "ifo-Geschäftsklima Oktober", "art": "Konjunktur", "land": "Deutschland", "status": "bestätigt" },
+    { "zeit": "2026-10-28T14:00:00-04:00", "titel": "Fed-Zinsentscheid", "art": "Zinsentscheid", "land": "USA", "status": "bestätigt" },
+    { "zeit": "2026-10-29T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" },
+    { "zeit": "2026-11-06T08:30:00-05:00", "titel": "US-Arbeitsmarktbericht Oktober", "art": "Konjunktur", "land": "USA", "status": "bestätigt" },
+    { "zeit": "2026-11-18T16:05:00-05:00", "titel": "Nvidia Quartalszahlen (Q3)", "art": "Quartalszahlen", "land": "USA", "status": "erwartet" },
+    { "zeit": "2026-11-24T10:00:00+01:00", "titel": "ifo-Geschäftsklima November", "art": "Konjunktur", "land": "Deutschland", "status": "bestätigt" },
+    { "zeit": "2026-12-04T08:30:00-05:00", "titel": "US-Arbeitsmarktbericht November", "art": "Konjunktur", "land": "USA", "status": "erwartet" },
+    { "zeit": "2026-12-09T14:00:00-05:00", "titel": "Fed-Zinsentscheid", "art": "Zinsentscheid", "land": "USA", "status": "bestätigt" },
+    { "zeit": "2026-12-10T08:30:00-05:00", "titel": "US-Inflation (CPI) November", "art": "Konjunktur", "land": "USA", "status": "erwartet" },
+    { "zeit": "2026-12-17T10:00:00+01:00", "titel": "ifo-Geschäftsklima Dezember", "art": "Konjunktur", "land": "Deutschland", "status": "bestätigt" },
+    { "zeit": "2026-12-17T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" },
+    { "zeit": "2027-02-04T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" },
+    { "zeit": "2027-03-18T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" }
   ]
 }

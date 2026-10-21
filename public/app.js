@@ -1,5 +1,5 @@
 // KI-Finanz-Radar – Oberfläche. Feed-Inhalte werden ausschließlich per textContent eingefügt (kein innerHTML).
-import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wetterSymbol } from './zeit.js';
+import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wandzeit } from './zeit.js';
 import { veraenderung, kurveZeichnen, kursText, zeitBeschriftung, spanneText } from './diagramm.js';
 import { watchlistLesen, suchbegriffe, meldungTrifft } from './watchlist.js';
 
@@ -245,24 +245,58 @@ function kopfTicken() {
   $('kw').textContent = `KW ${kalenderwoche(jetzt, ZEITZONE)}`;
   $('uhr').textContent = fmtUhrSek.format(jetzt);
   boersenAnzeigen(jetzt);
-  if (letzterStatus && jetzt.getSeconds() === 0) standAnzeigen(letzterStatus);
-  // Termine, die vorbei sind, fallen von selbst weg.
-  const naechster = kalender.termine.find((t) => Date.parse(t.zeit) > jetzt.getTime());
-  $('zeile-termin').hidden = !naechster;
-  if (naechster) $('termin').textContent = `${terminText(new Date(naechster.zeit), jetzt)} ${naechster.titel}`;
+  if (jetzt.getSeconds() === 0) {
+    if (letzterStatus) standAnzeigen(letzterStatus);
+    termineAnzeigen(jetzt);
+  }
 }
 
-function wetterAnzeigen(wetter) {
-  $('zeile-wetter').hidden = !wetter;
-  if (!wetter) return;
-  const [symbol, text] = wetterSymbol(wetter.code, wetter.tag);
-  const hochTief = wetter.hoch !== null && wetter.tief !== null ? ` (↑ ${wetter.hoch}° / ↓ ${wetter.tief}°)` : '';
-  $('wetter').textContent = `${symbol} ${wetter.temperatur} °C ${text}${hochTief} · ${wetter.ort}`;
+
+// ---------- Reiter „Termine“ ----------
+const fmtTerminTag = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, weekday: 'short', day: '2-digit', month: '2-digit' });
+const fmtMonat = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, month: 'long', year: 'numeric' });
+
+function abstandText(zeitpunkt, jetzt) {
+  const tage = Math.round((Date.UTC(...datumTeile(zeitpunkt)) - Date.UTC(...datumTeile(jetzt))) / 86400000);
+  if (tage <= 0) return 'heute';
+  if (tage === 1) return 'morgen';
+  return `in ${tage} Tagen`;
+}
+function datumTeile(d) {
+  const w = wandzeit(d, ZEITZONE);
+  return [w.jahr, w.monat - 1, w.tag];
 }
 
-// Auf dem PC alles offen, auf dem Handy nur das Wichtigste (Rest per Antippen).
-function kopfAufklappen() {
-  $('kopf-mehr').open = window.matchMedia('(min-width: 700px)').matches;
+function termineAnzeigen(jetzt) {
+  const kommend = (kalender.termine || []).filter((t) => Date.parse(t.zeit) > jetzt.getTime() - 3600 * 1000);
+  $('termine-leer').hidden = kommend.length > 0;
+  const gruppen = new Map();
+  for (const t of kommend) {
+    const monat = fmtMonat.format(new Date(t.zeit));
+    if (!gruppen.has(monat)) gruppen.set(monat, []);
+    gruppen.get(monat).push(t);
+  }
+  let ersterKommender = true;
+  $('termine-liste').replaceChildren(...[...gruppen].map(([monat, termine]) => {
+    const gruppe = element('section', 'boersen-gruppe termin-gruppe');
+    gruppe.append(element('h3', 'land', monat));
+    for (const t of termine) {
+      const zeitpunkt = new Date(t.zeit);
+      const zeile = element('div', 'termin-zeile');
+      if (ersterKommender && zeitpunkt > jetzt) { zeile.classList.add('termin-naechster'); ersterKommender = false; }
+      zeile.append(
+        element('span', 'termin-datum', `${fmtTerminTag.format(zeitpunkt)} ${fmtHhMm(ZEITZONE).format(zeitpunkt)}`),
+        element('span', 'termin-titel', t.titel),
+      );
+      const info = element('span', 'termin-info');
+      if (t.art) info.append(element('span', 'badge', t.art));
+      if (t.land) info.append(element('span', 'badge', t.land));
+      if (t.status === 'erwartet') info.append(element('span', 'badge termin-erwartet', 'erwartet'));
+      zeile.append(info, element('span', 'termin-abstand', abstandText(zeitpunkt, jetzt)));
+      gruppe.append(zeile);
+    }
+    return gruppe;
+  }));
 }
 
 // ---------- Kursdiagramme (DAX, S&P 500) ----------
@@ -352,16 +386,6 @@ function maerkteAnzeigen(kurse) {
   const indizes = (kurse?.indizes || []).filter((i) => Object.keys(i.verlauf || {}).length);
   $('maerkte').replaceChildren(...indizes.map((i) => diagrammKarte(i, kurse.zeitraeume || [], kurse.quelle || '')));
 
-  // Marktstimmung für die Kopfzeile aus der Tagesveränderung.
-  const tag = indizes.map((i) => ({ name: i.name, v: veraenderung(i.verlauf['1T'], i.vortag, '1T') })).filter((t) => t.v);
-  $('zeile-stimmung').hidden = tag.length === 0;
-  if (tag.length) {
-    const hoch = tag.filter((t) => t.v.pct > 0).length;
-    const gesamt = hoch === tag.length ? '▲ freundlich' : hoch === 0 ? '▼ schwach' : '◆ gemischt';
-    const klasse = hoch === tag.length ? 'positiv' : hoch === 0 ? 'negativ' : 'neutral';
-    const dd = $('stimmung');
-    dd.replaceChildren(element('strong', `stimmung-${klasse}`, gesamt), ` · ${tag.map((t) => `${t.name} ${t.v.text}`).join(' · ')}`);
-  }
 }
 
 // Die 3 wichtigsten Meldungen der letzten 24 Stunden (höchste KI-Relevanz, bei Gleichstand die neueste).
@@ -477,19 +501,6 @@ function watchlistAnzeigen() {
   const stark = mitKurs.filter((x) => Math.abs(x.w.pct) > STARKE_BEWEGUNG);
   $('zaehler-watchlist').hidden = stark.length === 0;
   $('zaehler-watchlist').textContent = `⚠ ${stark.length}`;
-
-  // Kopfzeile „Watchlist heute“
-  const dd = $('watchlist-heute');
-  if (!watchlist.length) {
-    dd.className = 'leise';
-    dd.textContent = 'noch leer – im Reiter „Watchlist“ anlegen';
-    return;
-  }
-  dd.className = '';
-  const hoch = mitKurs.filter((x) => x.w.pct > 0).length;
-  const runter = mitKurs.filter((x) => x.w.pct < 0).length;
-  dd.replaceChildren(`${watchlist.length} Werte · `, element('span', 'stimmung-positiv', `▲ ${hoch}`), ' · ', element('span', 'stimmung-negativ', `▼ ${runter}`));
-  for (const x of stark) dd.append(' · ', element('strong', 'wl-warnung', `⚠ ${x.e.name} ${pctFormat.format(x.w.pct)} %`));
 }
 
 function watchlistAlsText() {
@@ -523,7 +534,7 @@ function watchlistBearbeitenEinrichten() {
 }
 
 function reiterWechseln(ziel) {
-  for (const name of ['ticker', 'wichtig', 'watchlist', 'kurse', 'boersen']) {
+  for (const name of ['ticker', 'wichtig', 'watchlist', 'kurse', 'boersen', 'termine']) {
     const aktiv = name === ziel;
     $(`tab-${name}`).setAttribute('aria-selected', String(aktiv));
     $(`ansicht-${name}`).hidden = !aktiv;
@@ -553,7 +564,7 @@ async function laden() {
   if (status?.version) $('version').textContent = `Version ${status.version}`;
   letzterStatus = status;
   standAnzeigen(status);
-  wetterAnzeigen(status?.wetter || null);
+  termineAnzeigen(new Date());
   kopfTicken();
 
   const meldungen = Array.isArray(daten.meldungen) ? daten.meldungen : [];
@@ -589,13 +600,13 @@ $('tab-wichtig').addEventListener('click', () => reiterWechseln('wichtig'));
 $('tab-watchlist').addEventListener('click', () => reiterWechseln('watchlist'));
 $('tab-kurse').addEventListener('click', () => reiterWechseln('kurse'));
 $('tab-boersen').addEventListener('click', () => reiterWechseln('boersen'));
+$('tab-termine').addEventListener('click', () => reiterWechseln('termine'));
 watchlistBearbeitenEinrichten();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* ohne Offline-Modus weiter */ });
 }
 
-kopfAufklappen();
 kopfTicken();
 setInterval(kopfTicken, 1000);
 laden();

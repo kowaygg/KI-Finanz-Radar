@@ -8,11 +8,5 @@
   "aufbewahrungTage": 30,
   "relevanzSchwelle": 7,
   "dublettenAehnlichkeit": 0.6,
-  "dublettenZeitfensterStunden": 36,
-  "wetter": {
-    "ort": "Freiburg im Breisgau",
-    "breite": 47.99,
-    "laenge": 7.85,
-    "adresse": "https://api.open-meteo.com/v1/forecast"
-  }
+  "dublettenZeitfensterStunden": 36
 }

@@ -42,7 +42,7 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
 
 /* ---------- Grundbausteine ---------- */
-.karte-rahmen, .kurs-karte, .boersen-gruppe, .top-news, .kopf-mehr, .watchlist-bearbeiten, .privat-hinweis, .neu-hinweis {
+.karte-rahmen, .kurs-karte, .boersen-gruppe, .top-news, .watchlist-bearbeiten, .privat-hinweis, .neu-hinweis {
   background: var(--flaeche);
   border: 1px solid var(--linie);
   border-radius: var(--radius);
@@ -93,14 +93,6 @@ a { color: inherit; }
 .stand.alt { color: var(--warnung-text); font-weight: 700; }
 .kopf-wichtig { color: var(--akzent); font-weight: 700; }
 
-.kopf-mehr { margin-top: 10px; padding: 4px 12px; font-size: 0.9rem; }
-.kopf-mehr summary { cursor: pointer; color: var(--text-leise); padding: 6px 0; font-weight: 600; }
-.kopf-liste { margin: 2px 0 6px; display: grid; }
-.kopf-liste > div { display: grid; grid-template-columns: 9.5em 1fr; gap: 8px; padding: 6px 0; border-top: 1px solid var(--linie); }
-.kopf-liste > div:first-child { border-top: 0; }
-.kopf-liste dt { color: var(--text-leise); }
-.kopf-liste dd { margin: 0; }
-@media (min-width: 700px) { .kopf-mehr summary { display: none; } }
 
 .warnung {
   background: var(--warnung-hg); color: var(--warnung-text); border: 1px solid #7a3030;
@@ -226,7 +218,6 @@ main { padding-bottom: 8px; }
   .boerse-zeile { grid-template-columns: 1fr auto; }
   .boerse-countdown { grid-column: 1; font-size: 0.85rem; }
   .boerse-ort { grid-column: 2; }
-  .kopf-liste > div { grid-template-columns: 8em 1fr; }
 
   /* Reiterleiste unten (wie in gängigen Apps): Symbol + Text, gut mit dem Daumen erreichbar */
   body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
@@ -244,4 +235,21 @@ main { padding-bottom: 8px; }
   .reiter .ico { width: 22px; height: 22px; }
   .reiter-gruppe { flex: 2 1 0; border: 1px solid var(--rand); border-radius: 10px; }
   .reiter .zaehler { position: absolute; top: 0; right: 8%; font-size: 0.62rem; padding: 0 4px; min-width: 1.3em; }
+}
+
+/* ---------- Termine ---------- */
+.termine-tafel { display: grid; gap: var(--abstand); margin-top: 12px; }
+.termin-zeile { display: grid; grid-template-columns: 9.5em 1fr auto auto; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--linie); align-items: baseline; }
+.termin-gruppe .termin-zeile:first-of-type { border-top: 0; }
+.termin-datum { font-variant-numeric: tabular-nums; font-weight: 700; }
+.termin-titel { font-weight: 600; }
+.termin-info { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.termin-erwartet { border-style: dashed; color: var(--text-leise); }
+.termin-abstand { color: var(--text-leise); font-size: 0.85rem; text-align: right; min-width: 6em; font-variant-numeric: tabular-nums; }
+.termin-naechster { background: var(--flaeche-hoch); border: 1px solid var(--akzent); border-radius: 8px; padding: 8px; margin: 2px -8px; }
+.termin-naechster .termin-abstand { color: var(--akzent); font-weight: 700; }
+@media (max-width: 699px) {
+  .termin-zeile { grid-template-columns: 1fr auto; }
+  .termin-titel { grid-column: 1 / -1; }
+  .termin-info { grid-column: 1; justify-content: flex-start; }
 }
