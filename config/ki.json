@@ -13,7 +13,8 @@
       "typ": "openai",
       "schluesselVariable": "GROQ_API_KEY",
       "adresse": "https://api.groq.com/openai/v1",
-      "modelle": ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+      "modelle": ["openai/gpt-oss-120b", "openai/gpt-oss-20b"],
+      "parameter": { "reasoning_effort": "low", "max_completion_tokens": 8192 }
     },
     {
       "name": "Mistral",

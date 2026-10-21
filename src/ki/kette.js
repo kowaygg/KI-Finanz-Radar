@@ -39,11 +39,13 @@ async function geminiFragen({ adresse, modell, schluessel, anweisung, nachricht,
   return teile.filter((t) => !t.thought).map((t) => t.text || '').join('');
 }
 
-async function openaiFragen({ adresse, modell, schluessel, anweisung, nachricht, timeoutMs, holen }) {
+async function openaiFragen({ adresse, modell, schluessel, anweisung, nachricht, timeoutMs, holen, parameter = {} }) {
   const antwort = await holen(`${adresse}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${schluessel}` },
     body: JSON.stringify({
+      // Dienst-eigene Zusatzwerte aus config/ki.json (z. B. Groq: wenig „Nachdenken“, damit 25 Meldungen ins Limit passen)
+      ...parameter,
       model: modell,
       temperature: 0.2,
       response_format: { type: 'json_object' },
@@ -77,7 +79,7 @@ export function ketteErstellen(kiEinstellungen, { umgebung = process.env, holen 
         if (fehlendeModelle.has(`${dienst.name}/${modell}`)) continue;
         try {
           const text = await FRAGEN[dienst.typ]({
-            adresse: dienst.adresse, modell, schluessel: dienst.schluessel, anweisung, nachricht,
+            adresse: dienst.adresse, modell, schluessel: dienst.schluessel, anweisung, nachricht, parameter: dienst.parameter,
             timeoutMs: kiEinstellungen.timeoutSekunden * 1000, holen,
           });
           const json = jsonAusText(text);
