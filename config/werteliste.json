@@ -127,6 +127,8 @@
     { "name": "VanEck Semiconductor", "isin": "IE00BMC38736", "symbol": "VVSM.DE", "art": "ETF" },
     { "name": "iShares Automation & Robotics", "isin": "IE00BYZK4552", "symbol": "2B76.DE", "art": "ETF" },
     { "name": "iShares Global Clean Energy", "isin": "IE00B1XNHC34", "symbol": "IQQH.DE", "art": "ETF" },
+    { "name": "iShares Global Aerospace & Defence", "isin": "IE000U9ODG19", "symbol": "5J50.DE", "art": "ETF" },
+    { "name": "Xtrackers Physical Silver EUR Hedged ETC", "isin": "DE000A1EK0J7", "symbol": "XAD2.DE", "art": "ETC" },
     { "name": "Xetra-Gold", "isin": "DE000A0S9GB0", "symbol": "4GLD.DE", "art": "ETC" }
   ]
 }
