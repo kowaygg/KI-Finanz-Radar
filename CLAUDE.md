@@ -227,15 +227,18 @@ VORGEHEN
 - 21.10.2026: Watchlist bis ca. 10 Werte; Werte ohne freien Kurs zeigen nur News
 - 21.10.2026: Watchlist-Kurse = Variante B: Cloud lädt Kurse einer großen öffentlichen Werteliste (einige hundert: DAX, MSCI World, S&P 500, Nasdaq, beliebte ETFs); die App filtert die Watchlist NUR lokal. Die Werteliste darf nie gezielt nach der Watchlist zusammengestellt werden; einzelne fehlende Werte nur nach ausdrücklichem OK des Nutzers ergänzen, sonst nur News
 - 21.10.2026: News-Abruf alle 15 Minuten (GitHub-Actions-Cron; Verzögerungen ok)
-- 21.10.2026: Repo-Name `ki-finanz-radar` (öffentlich, Adresse https://kowaygg.github.io/ki-finanz-radar/); App-Name „KI-Finanzradar“
+- 21.10.2026: Name überall „KI-Finanz-Radar“: Repo `KI-Finanz-Radar` (öffentlich, Adresse https://kowaygg.github.io/KI-Finanz-Radar/ – Groß-/Kleinschreibung beachten), App-Name „KI-Finanz-Radar“
 - 21.10.2026: Technik: Node.js (schon installiert), kein Python
 - Alle Rückfragen vom 21.10.2026 beantwortet
+- 21.10.2026: Meldungsdaten nicht in die Hauptgeschichte committen, sondern in einen eigenen Daten-Zweig (regelmäßig zusammengefasst) → Repo bleibt klein
 
 ### Aufbau
 - `CLAUDE.md` – diese Datei
 - `.gitignore` – schließt `.env`, lokale Importdateien (`*.local.*`, `watchlist*.json`) usw. aus
+- `PLAN.md` – Meilensteine M1–M8, geprüfte Quellen, Gratis-Grenzen (Stand 21.10.2026)
 
 ### Offene Punkte
 - Rückfragen: erledigt (21.10.2026)
-- Als Nächstes: Plan mit Meilensteinen + Abschätzung der Gratis-Grenzen (Feeds, Kursquellen, KI prüfen)
-- Leeres öffentliches Repo `ki-finanz-radar` auf GitHub anlegen und verbinden (erst wenn Version 1 steht)
+- Plan erstellt (`PLAN.md`) – wartet auf OK für M1 (Grundgerüst lokal)
+- Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen
+- Leeres öffentliches Repo `KI-Finanz-Radar` auf GitHub anlegen und verbinden (erst wenn Version 1 steht)
