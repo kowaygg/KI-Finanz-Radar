@@ -230,6 +230,7 @@ VORGEHEN
 - 21.10.2026: Name überall „KI-Finanz-Radar“: Repo `KI-Finanz-Radar` (öffentlich, Adresse https://kowaygg.github.io/KI-Finanz-Radar/ – Groß-/Kleinschreibung beachten), App-Name „KI-Finanz-Radar“
 - 21.10.2026: Technik: Node.js (schon installiert), kein Python
 - Alle Rückfragen vom 21.10.2026 beantwortet
+- 21.10.2026 (M2): KI in zwei Stufen (Bewertung 25/Anfrage, Analyse ab Relevanz 7, 5/Anfrage, max. 4+4 Anfragen pro Lauf). Fehler pro Modell: 429/404/503 → nächstes Modell desselben Dienstes, 401/403 → nächster Dienst. KI vergibt Ereignis-Kürzel → gleiche Ereignisse (auch sprachübergreifend) in „Wichtig“ zusammengefasst. Clickbait/Gerüchte max. Relevanz 3. Prompt verlangt Strenge (~10 % ≥ 7, PR max. 6). Modelle 21.10.2026 per ki-check bestätigt: gemini-3.8-flash, gemini-3.5-flash-lite, gemini-2.5-flash
 - 21.10.2026 (M1): Nur Meldungen der letzten 48 h aufnehmen; Teaser nur intern als KI-Eingabe, nie veröffentlicht/angezeigt; Service Worker holt alles zuerst aus dem Netz (Offline-Fallback)
 - 21.10.2026: Meldungsdaten nicht in die Hauptgeschichte committen, sondern in einen eigenen Daten-Zweig (regelmäßig zusammengefasst) → Repo bleibt klein
 
@@ -243,6 +244,9 @@ VORGEHEN
 - `src/` – Abruf (Node.js, keine Zusatzpakete): `run.js` (Durchlauf), `feed-parser.js` (RSS/Atom), `bereinigen.js` (nur Text, nur https), `dubletten.js`, `vorfilter.js`, `sammeln.js`
 - `public/` – PWA (index.html mit CSP + noindex, app.js nur textContent, sw.js Offline, manifest, Symbole)
 - `scripts/` – `serve.js` (lokaler Test-Server localhost:8080), `make-icons.js`
+- `config/ki.json` – KI-Kette (Reihenfolge, Modelle, Bündelgrößen, Limits pro Lauf); Schlüsselnamen nur als Variablennamen
+- `src/ki/` – `anweisungen.js` (feste Prompts, Daten-JSON), `pruefen.js` (strenge Prüfung), `kette.js` (Ausweichkette), `analyse.js` (Bewertung → Ereignis-Zusammenfassung → Analyse)
+- `.env` (lokal, ignoriert) / `.env.beispiel` – API-Schlüssel
 - `tests/` – `npm test` (Node-Testrunner)
 - Erzeugt, nicht im Repo: `data/zustand.json` (mit Teaser für KI), `public/data/meldungen.json` + `status.json` (öffentlich, ohne Teaser)
 
@@ -250,9 +254,11 @@ VORGEHEN
 - `npm run abruf` – einmal alle Quellen abrufen
 - `npm start` – App lokal unter http://localhost:8080
 - `npm test` – automatische Tests
+- `npm run ki-check` – prüft Schlüssel und ob die eingestellten Modelle noch existieren
 
 ### Offene Punkte
 - Rückfragen: erledigt (21.10.2026)
-- M1 (Version 0.1.0) fertig und lokal getestet (21.10.2026) – als Nächstes M2 (KI-Filter, Gemini-Schlüssel)
+- M1 (0.1.0) und M2 (0.2.0) fertig und lokal getestet (21.10.2026) – als Nächstes M3 (Online gehen: GitHub-Repo, Secrets, Actions alle 15 Min., Pages)
+- Groq-/Mistral-/OpenRouter-Konten noch nicht angelegt (Kette läuft vorerst nur mit Gemini)
 - Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen
 - Leeres öffentliches Repo `KI-Finanz-Radar` auf GitHub anlegen und verbinden (erst wenn Version 1 steht)

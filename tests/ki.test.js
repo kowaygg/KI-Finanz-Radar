@@ -83,10 +83,21 @@ test('Kette: abgeschaltetes Modell → nächstes Modell; Limit → nächster Die
   const r1 = await kette.fragen('a', 'b');
   assert.equal(r1.dienst, 'Groq');
   assert.deepEqual(r1.json, { ok: true });
-  // Gemini ist für diesen Lauf am Limit und wird nicht erneut gefragt.
+  // Beide Gemini-Modelle sind für diesen Lauf abgehakt und werden nicht erneut gefragt.
   await kette.fragen('a', 'b');
   assert.equal(aufrufe.filter((u) => u.includes('g.test')).length, 2);
   assert.ok(!JSON.stringify(kette.protokoll).includes('geheim'));
+});
+
+test('Kette: überlastetes Modell (503) → erst das nächste Modell desselben Dienstes', async () => {
+  const holen = async (url) => {
+    if (url.includes('/models/alt:')) return antwortVon(503, {});
+    return antwortVon(200, { candidates: [{ content: { parts: [{ text: '{"ok":1}' }] } }] });
+  };
+  const kette = ketteErstellen(kiEinstellungen, { umgebung: { G: 'x', Q: 'y' }, holen });
+  const r = await kette.fragen('a', 'b');
+  assert.equal(r.dienst, 'Gemini');
+  assert.equal(r.modell, 'neu');
 });
 
 test('Kette: ohne Schlüssel kein Dienst; alle gestört → null statt Absturz', async () => {
@@ -132,6 +143,33 @@ test('Durchlauf: bewertet nur neue Meldungen, analysiert nur ab Schwelle, lösch
   gesendet.length = 0;
   await kiDurchlauf(meldungen, kette, { kiEinstellungen: einst, relevanzSchwelle: 7, jetzt: new Date() });
   assert.equal(gesendet.length, 0);
+});
+
+test('Durchlauf: gleiches Ereignis aus zwei Quellen erscheint nur einmal in „Wichtig“', async () => {
+  const meldungen = [
+    { id: 'a', titel: 'Tesla und SpaceX prüfen Zusammenschluss', teaser: 't', vorfilter: 'ok', ki: null, datum: '2026-10-21T10:00:00Z', quellen: [{ name: 'A', link: 'https://a.de/1' }] },
+    { id: 'b', titel: 'Musk erwägt Fusion', teaser: 't', vorfilter: 'ok', ki: null, datum: '2026-10-21T10:30:00Z', quellen: [{ name: 'B', link: 'https://b.de/1' }] },
+  ];
+  const anfragen = [];
+  const kette = {
+    fragen: async (anweisung, nachricht) => {
+      anfragen.push(nachricht);
+      if (anweisung.includes('AUFGABE: Bewerte')) {
+        return { dienst: 'T', modell: 'm', json: { bewertungen: [
+          { id: 'a', relevanz: 9, kategorie: 'Unternehmen', stimmung: 'neutral', ereignis: 'Tesla-SpaceX-Fusion' },
+          { id: 'b', relevanz: 8, kategorie: 'Unternehmen', stimmung: 'neutral', ereignis: 'tesla-spacex-fusion' },
+        ] } };
+      }
+      return { dienst: 'T', modell: 'm', json: { analysen: [] } };
+    },
+  };
+  const einst = { meldungenProBewertung: 25, meldungenProAnalyse: 5, maxBewertungsAnfragenProLauf: 4, maxAnalyseAnfragenProLauf: 4 };
+  await kiDurchlauf(meldungen, kette, { kiEinstellungen: einst, relevanzSchwelle: 7, jetzt: new Date('2026-10-21T12:00:00Z') });
+  assert.equal(meldungen[0].ki.dublette, undefined);
+  assert.equal(meldungen[1].ki.dublette, 'a');
+  assert.deepEqual(meldungen[0].quellen.map((q) => q.name), ['A', 'B']);
+  // Nur die Hauptmeldung wird ausführlich analysiert.
+  assert.ok(anfragen[1].includes('"id":"a"') && !anfragen[1].includes('"id":"b"'));
 });
 
 test('Durchlauf: alle Dienste am Limit → Meldungen bleiben offen und werden später nachgeholt', async () => {

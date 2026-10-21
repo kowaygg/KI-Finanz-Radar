@@ -11,6 +11,34 @@ function paeckchen(liste, groesse) {
 }
 
 const neuesteZuerst = (a, b) => Date.parse(b.datum) - Date.parse(a.datum);
+const EREIGNIS_FENSTER_MS = 48 * 3600 * 1000;
+
+function wichtigeEreignisse(meldungen, relevanzSchwelle, jetzt) {
+  const kuerzel = meldungen
+    .filter((m) => m.ki?.ereignis && m.ki.relevanz >= relevanzSchwelle && jetzt - Date.parse(m.datum) < EREIGNIS_FENSTER_MS)
+    .sort(neuesteZuerst)
+    .map((m) => m.ki.ereignis);
+  return [...new Set(kuerzel)].slice(0, 40);
+}
+
+// Gleiches Ereignis aus mehreren Quellen: nur eine Meldung bleibt in „Wichtig“, die anderen werden ihr als Quellen angehängt.
+function ereignisseZusammenfassen(meldungen, relevanzSchwelle) {
+  const haupt = new Map();
+  const reihenfolge = [...meldungen]
+    .filter((m) => m.ki?.ereignis && m.ki.relevanz >= relevanzSchwelle && !m.ki.dublette)
+    .sort((a, b) => Number(Boolean(b.ki.analyse)) - Number(Boolean(a.ki.analyse)) || Date.parse(a.datum) - Date.parse(b.datum));
+  for (const m of reihenfolge) {
+    const vorhanden = haupt.get(m.ki.ereignis);
+    if (!vorhanden || Math.abs(Date.parse(vorhanden.datum) - Date.parse(m.datum)) > EREIGNIS_FENSTER_MS) {
+      haupt.set(m.ki.ereignis, m);
+      continue;
+    }
+    m.ki.dublette = vorhanden.id;
+    m.teaser = '';
+    for (const q of m.quellen) if (!vorhanden.quellen.some((v) => v.link === q.link)) vorhanden.quellen.push(q);
+    vorhanden.ki.relevanz = Math.max(vorhanden.ki.relevanz, m.ki.relevanz);
+  }
+}
 
 export async function kiDurchlauf(meldungen, kette, { kiEinstellungen, relevanzSchwelle, jetzt }) {
   const bericht = { bewertet: 0, analysiert: 0, anfragen: 0, abgebrochen: false };
@@ -18,7 +46,7 @@ export async function kiDurchlauf(meldungen, kette, { kiEinstellungen, relevanzS
   const offenBewertung = meldungen.filter((m) => m.vorfilter === 'ok' && !m.ki).sort(neuesteZuerst);
   for (const gruppe of paeckchen(offenBewertung, kiEinstellungen.meldungenProBewertung).slice(0, kiEinstellungen.maxBewertungsAnfragenProLauf)) {
     bericht.anfragen++;
-    const antwort = await kette.fragen(BEWERTEN, datenNachricht(gruppe));
+    const antwort = await kette.fragen(BEWERTEN, datenNachricht(gruppe, wichtigeEreignisse(meldungen, relevanzSchwelle, jetzt.getTime())));
     if (!antwort) { bericht.abgebrochen = true; break; }
     const geprueft = bewertungenPruefen(antwort.json, new Set(gruppe.map((m) => m.id)));
     for (const m of gruppe) {
@@ -29,10 +57,11 @@ export async function kiDurchlauf(meldungen, kette, { kiEinstellungen, relevanzS
       if (b.relevanz < relevanzSchwelle) m.teaser = '';
       bericht.bewertet++;
     }
+    ereignisseZusammenfassen(meldungen, relevanzSchwelle);
   }
 
   if (!bericht.abgebrochen) {
-    const offenAnalyse = meldungen.filter((m) => m.ki && m.ki.relevanz >= relevanzSchwelle && !m.ki.analyse).sort(neuesteZuerst);
+    const offenAnalyse = meldungen.filter((m) => m.ki && m.ki.relevanz >= relevanzSchwelle && !m.ki.analyse && !m.ki.dublette).sort(neuesteZuerst);
     for (const gruppe of paeckchen(offenAnalyse, kiEinstellungen.meldungenProAnalyse).slice(0, kiEinstellungen.maxAnalyseAnfragenProLauf)) {
       bericht.anfragen++;
       const antwort = await kette.fragen(ANALYSIEREN, datenNachricht(gruppe));
@@ -48,6 +77,6 @@ export async function kiDurchlauf(meldungen, kette, { kiEinstellungen, relevanzS
     }
   }
 
-  bericht.offen = meldungen.filter((m) => (m.vorfilter === 'ok' && !m.ki) || (m.ki && m.ki.relevanz >= relevanzSchwelle && !m.ki.analyse)).length;
+  bericht.offen = meldungen.filter((m) => (m.vorfilter === 'ok' && !m.ki) || (m.ki && m.ki.relevanz >= relevanzSchwelle && !m.ki.analyse && !m.ki.dublette)).length;
   return bericht;
 }

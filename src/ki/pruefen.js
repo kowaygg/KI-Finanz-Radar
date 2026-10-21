@@ -36,6 +36,7 @@ export function bewertungenPruefen(antwort, erlaubteIds) {
       stimmung,
       clickbait,
       geruecht,
+      ereignis: typeof b.ereignis === 'string' ? b.ereignis.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').slice(0, 60) || null : null,
     });
   }
   return ergebnis;

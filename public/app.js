@@ -132,7 +132,8 @@ function wichtigElement(m) {
   }
 
   const box = element('div', 'einschaetzung');
-  box.append(element('div', 'einschaetzung-titel', `KI-Einschätzung · ${analyse.einschaetzung.zeithorizont} · Sicherheit: ${analyse.einschaetzung.sicherheit}`));
+  const horizont = { kurzfristig: 'kurzfristig', langfristig: 'langfristig', beides: 'kurz- und langfristig' }[analyse.einschaetzung.zeithorizont] || '';
+  box.append(element('div', 'einschaetzung-titel', `KI-Einschätzung · Zeithorizont: ${horizont} · Sicherheit: ${analyse.einschaetzung.sicherheit}`));
   box.append(element('p', null, analyse.einschaetzung.text));
   if (analyse.vergleich) box.append(element('p', 'vergleich', `Historischer Vergleich: ${analyse.vergleich}`));
   box.append(element('div', 'modell', `Analysiert von ${analyse.dienst} (${analyse.modell}) · keine Anlageberatung`));
@@ -199,7 +200,7 @@ async function laden() {
   $('zaehler-ticker').textContent = String(neu);
 
   const schwelle = Number(status?.relevanzSchwelle) || 7;
-  const wichtig = meldungen.filter((m) => Number(m.ki?.relevanz) >= schwelle);
+  const wichtig = meldungen.filter((m) => Number(m.ki?.relevanz) >= schwelle && !m.ki.dublette);
   $('liste-wichtig').replaceChildren(...wichtig.map((m) => wichtigElement(m)));
   $('wichtig-leer').hidden = wichtig.length > 0;
   const wichtigNeu = zuletztGesehen ? wichtig.filter((m) => Date.parse(m.ki.bewertetAm) > zuletztGesehen).length : wichtig.length;

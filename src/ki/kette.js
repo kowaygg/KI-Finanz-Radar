@@ -62,7 +62,7 @@ export function ketteErstellen(kiEinstellungen, { umgebung = process.env, holen 
     .map((d) => ({ ...d, schluessel: umgebung[d.schluesselVariable] || '' }))
     .filter((d) => d.schluessel && FRAGEN[d.typ]);
   const erschoepft = new Set();
-  const fehlendeModelle = new Set();
+  const fehlendeModelle = new Set(); // abgeschaltet oder am Limit
   const protokoll = [];
 
   async function fragen(anweisung, nachricht) {
@@ -82,9 +82,11 @@ export function ketteErstellen(kiEinstellungen, { umgebung = process.env, holen 
         } catch (fehler) {
           const grund = fehler.name === 'TimeoutError' ? 'Zeitüberschreitung' : fehler.message;
           protokoll.push({ dienst: dienst.name, modell, ok: false, grund });
-          if (fehler.modellFehlt) { fehlendeModelle.add(`${dienst.name}/${modell}`); continue; }
-          if (fehler.limit || fehler.status === 401 || fehler.status === 403) erschoepft.add(dienst.name);
-          break; // nächster Dienst
+          // Schlüssel ungültig/gesperrt → ganzer Dienst fällt für diesen Lauf aus.
+          if (fehler.status === 401 || fehler.status === 403) { erschoepft.add(dienst.name); break; }
+          // Modell abgeschaltet oder am Limit (jedes Modell hat eigenes Kontingent) → für diesen Lauf überspringen.
+          if (fehler.modellFehlt || fehler.limit) fehlendeModelle.add(`${dienst.name}/${modell}`);
+          // Sonst (überlastet, Zeitüberschreitung, kaputtes JSON): nächstes Modell, danach nächster Dienst.
         }
       }
     }
