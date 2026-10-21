@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#16181d">
+  <title>KI-Finanz-Radar</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="kopf">
+    <div class="kopf-zeile">
+      <h1>KI-Finanz-Radar</h1>
+      <span class="version" id="version"></span>
+    </div>
+    <div class="kopf-zeile klein">
+      <span id="datum"></span>
+      <span id="stand" class="stand"></span>
+    </div>
+    <p id="warnung" class="warnung" hidden></p>
+  </header>
+
+  <nav class="reiter" role="tablist" aria-label="Ansicht">
+    <button role="tab" id="tab-ticker" aria-controls="ansicht-ticker" aria-selected="true">Live-Ticker <span id="zaehler-ticker" class="zaehler" hidden></span></button>
+    <button role="tab" id="tab-wichtig" aria-controls="ansicht-wichtig" aria-selected="false">Wichtig <span id="zaehler-wichtig" class="zaehler" hidden></span></button>
+  </nav>
+
+  <main>
+    <section id="ansicht-ticker" role="tabpanel" aria-labelledby="tab-ticker">
+      <p id="neu-hinweis" class="neu-hinweis" hidden></p>
+      <ol id="liste-ticker" class="liste"></ol>
+    </section>
+    <section id="ansicht-wichtig" role="tabpanel" aria-labelledby="tab-wichtig" hidden>
+      <ol id="liste-wichtig" class="liste"></ol>
+      <p id="wichtig-leer" class="leer" hidden>Noch keine KI-bewerteten Meldungen. Die KI-Analyse kommt mit Meilenstein 2.</p>
+    </section>
+  </main>
+
+  <footer class="fuss">
+    <p>Nur Informationen, keine Anlageberatung. Überschriften und Links stammen von den genannten Quellen.</p>
+  </footer>
+</body>
+</html>

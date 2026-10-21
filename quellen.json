@@ -1,0 +1,15 @@
+{
+  "_anleitung": "Hier stehen alle News-Quellen. Neue Quelle: einen Block kopieren, Name, Adresse (nur https) und Kategorie anpassen. Mit \"aktiv\": false wird eine Quelle abgeschaltet. Erlaubte Kategorien: Wirtschaft, Börse, KI, Tech, Politik mit Marktbezug, Unternehmen, Startups & Finanzierungsrunden.",
+  "quellen": [
+    { "name": "Handelsblatt", "url": "https://www.handelsblatt.com/contentexport/feed/schlagzeilen", "kategorie": "Wirtschaft", "sprache": "de", "aktiv": true },
+    { "name": "tagesschau Wirtschaft", "url": "https://www.tagesschau.de/wirtschaft/index~rss2.xml", "kategorie": "Wirtschaft", "sprache": "de", "aktiv": true },
+    { "name": "CNBC", "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114", "kategorie": "Börse", "sprache": "en", "aktiv": true },
+    { "name": "heise KI", "url": "https://www.heise.de/thema/Kuenstliche-Intelligenz.xml", "kategorie": "KI", "sprache": "de", "aktiv": true },
+    { "name": "TechCrunch AI", "url": "https://techcrunch.com/category/artificial-intelligence/feed/", "kategorie": "KI", "sprache": "en", "aktiv": true },
+    { "name": "OpenAI", "url": "https://openai.com/news/rss.xml", "kategorie": "KI", "sprache": "en", "aktiv": true },
+    { "name": "NVIDIA Newsroom", "url": "https://nvidianews.nvidia.com/releases.xml", "kategorie": "Unternehmen", "sprache": "en", "aktiv": true },
+    { "name": "EZB", "url": "https://www.ecb.europa.eu/rss/press.html", "kategorie": "Wirtschaft", "sprache": "en", "aktiv": true },
+    { "name": "Fed", "url": "https://www.federalreserve.gov/feeds/press_all.xml", "kategorie": "Wirtschaft", "sprache": "en", "aktiv": true },
+    { "name": "Crunchbase News", "url": "https://news.crunchbase.com/feed/", "kategorie": "Startups & Finanzierungsrunden", "sprache": "en", "aktiv": true }
+  ]
+}

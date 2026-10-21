@@ -230,15 +230,29 @@ VORGEHEN
 - 21.10.2026: Name überall „KI-Finanz-Radar“: Repo `KI-Finanz-Radar` (öffentlich, Adresse https://kowaygg.github.io/KI-Finanz-Radar/ – Groß-/Kleinschreibung beachten), App-Name „KI-Finanz-Radar“
 - 21.10.2026: Technik: Node.js (schon installiert), kein Python
 - Alle Rückfragen vom 21.10.2026 beantwortet
+- 21.10.2026 (M1): Nur Meldungen der letzten 48 h aufnehmen; Teaser nur intern als KI-Eingabe, nie veröffentlicht/angezeigt; Service Worker holt alles zuerst aus dem Netz (Offline-Fallback)
 - 21.10.2026: Meldungsdaten nicht in die Hauptgeschichte committen, sondern in einen eigenen Daten-Zweig (regelmäßig zusammengefasst) → Repo bleibt klein
 
 ### Aufbau
 - `CLAUDE.md` – diese Datei
 - `.gitignore` – schließt `.env`, lokale Importdateien (`*.local.*`, `watchlist*.json`) usw. aus
 - `PLAN.md` – Meilensteine M1–M8, geprüfte Quellen, Gratis-Grenzen (Stand 21.10.2026)
+- `quellen.json` – News-Quellen (für den Nutzer erweiterbar)
+- `config/einstellungen.json` – zentrale Werte (User-Agent, Zeitlimits, Aufbewahrung, Relevanzschwelle, Dubletten)
+- `config/vorfilter.json` – Stichwortlisten: `werbung` (nie anzeigen), `ohneKi` (nur Live-Ticker)
+- `src/` – Abruf (Node.js, keine Zusatzpakete): `run.js` (Durchlauf), `feed-parser.js` (RSS/Atom), `bereinigen.js` (nur Text, nur https), `dubletten.js`, `vorfilter.js`, `sammeln.js`
+- `public/` – PWA (index.html mit CSP + noindex, app.js nur textContent, sw.js Offline, manifest, Symbole)
+- `scripts/` – `serve.js` (lokaler Test-Server localhost:8080), `make-icons.js`
+- `tests/` – `npm test` (Node-Testrunner)
+- Erzeugt, nicht im Repo: `data/zustand.json` (mit Teaser für KI), `public/data/meldungen.json` + `status.json` (öffentlich, ohne Teaser)
+
+### Befehle
+- `npm run abruf` – einmal alle Quellen abrufen
+- `npm start` – App lokal unter http://localhost:8080
+- `npm test` – automatische Tests
 
 ### Offene Punkte
 - Rückfragen: erledigt (21.10.2026)
-- Plan erstellt (`PLAN.md`) – wartet auf OK für M1 (Grundgerüst lokal)
+- M1 (Version 0.1.0) fertig und lokal getestet (21.10.2026) – als Nächstes M2 (KI-Filter, Gemini-Schlüssel)
 - Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen
 - Leeres öffentliches Repo `KI-Finanz-Radar` auf GitHub anlegen und verbinden (erst wenn Version 1 steht)

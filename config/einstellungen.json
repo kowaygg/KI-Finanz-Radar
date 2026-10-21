@@ -1,0 +1,12 @@
+{
+  "_anleitung": "Zentrale Einstellungen. Jeder Wert ist nur hier eingestellt.",
+  "userAgent": "KI-Finanz-Radar/0.1 (privater News-Leser; https://github.com/kowaygg/KI-Finanz-Radar)",
+  "abrufTimeoutSekunden": 15,
+  "pauseZwischenQuellenMs": 1000,
+  "maxMeldungenProQuelle": 30,
+  "maxAlterStunden": 48,
+  "aufbewahrungTage": 30,
+  "relevanzSchwelle": 7,
+  "dublettenAehnlichkeit": 0.6,
+  "dublettenZeitfensterStunden": 36
+}

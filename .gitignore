@@ -15,3 +15,7 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+
+# Erzeugte Daten (lokal; online ab M3 im Daten-Zweig)
+data/
+public/data/

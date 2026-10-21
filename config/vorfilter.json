@@ -1,0 +1,11 @@
+{
+  "_anleitung": "Vorfilter ohne KI. 'werbung': Meldung wird gar nicht angezeigt. 'ohneKi': Meldung erscheint im Live-Ticker, geht aber nicht an die KI (spart Kontingent). Groß-/Kleinschreibung egal; Wörter werden als ganzes Wort gesucht.",
+  "werbung": [
+    "anzeige", "sponsored", "advertorial", "werbung", "gewinnspiel", "rabattcode", "gutschein", "promo code", "deal des tages"
+  ],
+  "ohneKi": [
+    "horoskop", "rezept", "fußball", "bundesliga", "champions league", "formel 1", "tatort", "dschungelcamp",
+    "quiz", "kreuzworträtsel", "wetter am wochenende", "royals", "promi",
+    "podcast:", "newsletter:", "live-blog", "liveblog", "watch live", "video:"
+  ]
+}
