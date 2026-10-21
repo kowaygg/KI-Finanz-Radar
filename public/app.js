@@ -719,6 +719,45 @@ $('tab-zinsen').addEventListener('click', () => reiterWechseln('zinsen'));
 zinsenEinrichten();
 watchlistBearbeitenEinrichten();
 
+// ---------- Knopf „App-Link“ – nur auf dem Gerät des Besitzers ----------
+// Einmal öffnen mit …/KI-Finanz-Radar/#besitzer=CODE schaltet den Knopf auf diesem Gerät frei.
+// Im Code steht nur der SHA-256-Fingerabdruck des Codes, nie der Code selbst.
+const BESITZER_FINGERABDRUCK = 'b16cdb91d6b15be91de8fbff6688ab716b346eda19956e0bdefcdd0fee792fd7';
+const SPEICHER_BESITZER = 'radar.besitzer';
+
+function kurzerHinweis(text) {
+  const el = $('hinweis-kurz');
+  el.textContent = text;
+  el.hidden = false;
+  setTimeout(() => { el.hidden = true; }, 4000);
+}
+
+async function besitzerPruefen() {
+  const treffer = location.hash.match(/^#besitzer=([A-Za-z0-9]{8,40})$/);
+  if (treffer && crypto?.subtle) {
+    const daten = new TextEncoder().encode(treffer[1]);
+    const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', daten))].map((b) => b.toString(16).padStart(2, '0')).join('');
+    history.replaceState(null, '', location.pathname + location.search);
+    if (hash === BESITZER_FINGERABDRUCK) {
+      speicherSchreiben(SPEICHER_BESITZER, '1');
+      kurzerHinweis('✓ Knopf „App-Link“ ist auf diesem Gerät freigeschaltet.');
+    }
+  }
+  $('link-kopieren').hidden = speicherLesen(SPEICHER_BESITZER) !== '1';
+}
+
+$('link-kopieren').addEventListener('click', async () => {
+  const link = `${location.origin}${location.pathname}`;
+  try {
+    await navigator.clipboard.writeText(link);
+    kurzerHinweis(`App-Link kopiert: ${link}`);
+  } catch {
+    kurzerHinweis(`App-Link: ${link}`);
+  }
+});
+besitzerPruefen();
+window.addEventListener('hashchange', besitzerPruefen);
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* ohne Offline-Modus weiter */ });
 }

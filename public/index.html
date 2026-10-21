@@ -18,8 +18,15 @@
   <header class="kopf">
     <div class="kopf-zeile">
       <h1>KI-Finanz-Radar</h1>
-      <span class="version" id="version"></span>
+      <span class="kopf-rechts">
+        <span class="version" id="version"></span>
+        <button type="button" id="link-kopieren" class="knopf-leise knopf-klein" title="App-Link zum Weitergeben kopieren" hidden>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+          <span>App-Link</span>
+        </button>
+      </span>
     </div>
+    <p id="hinweis-kurz" class="hinweis-kurz" role="status" hidden></p>
     <div class="kopf-uhr">
       <span id="datum"></span>
       <span class="trenner">·</span>

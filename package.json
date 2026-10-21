@@ -1,6 +1,6 @@
 {
   "name": "ki-finanz-radar",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "private": true,
   "description": "Persönlicher News-Radar für Wirtschaft, Börse und KI (PWA)",
   "type": "module",

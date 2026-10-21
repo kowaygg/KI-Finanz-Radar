@@ -289,3 +289,9 @@ main { padding-bottom: 8px; }
   .reiter > button, .reiter-gruppe button { font-size: 0.66rem; }
 }
 .stand-info { color: var(--text-leise); font-weight: 400; }
+
+/* Knopf „App-Link“ (nur Besitzer) */
+.kopf-rechts { display: inline-flex; align-items: center; gap: 10px; }
+.knopf-klein { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font: inherit; font-size: 0.82rem; border: 1px solid var(--rand); border-radius: 8px; cursor: pointer; }
+.knopf-klein .ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hinweis-kurz { margin: 8px 0 0; padding: 6px 10px; border: 1px solid var(--akzent); border-radius: 8px; background: var(--flaeche-hoch); font-size: 0.85rem; word-break: break-all; }
