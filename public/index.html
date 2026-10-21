@@ -12,7 +12,7 @@
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+  <script type="module" src="app.js"></script>
 </head>
 <body>
   <header class="kopf">
@@ -20,10 +20,27 @@
       <h1>KI-Finanz-Radar</h1>
       <span class="version" id="version"></span>
     </div>
-    <div class="kopf-zeile klein">
+    <div class="kopf-uhr">
       <span id="datum"></span>
-      <span id="stand" class="stand"></span>
+      <span class="trenner">·</span>
+      <span id="kw"></span>
+      <span class="trenner">·</span>
+      <time id="uhr" class="uhr"></time>
     </div>
+    <div class="kopf-boersen" id="boersen"></div>
+    <div class="kopf-zeile klein">
+      <span id="stand" class="stand"></span>
+      <span id="kopf-wichtig" class="kopf-wichtig" hidden></span>
+    </div>
+    <details id="kopf-mehr" class="kopf-mehr">
+      <summary>Mehr anzeigen</summary>
+      <dl class="kopf-liste">
+        <div id="zeile-wetter" hidden><dt>Wetter</dt><dd id="wetter"></dd></div>
+        <div id="zeile-termin" hidden><dt>Nächster Termin</dt><dd id="termin"></dd></div>
+        <div><dt>Marktstimmung</dt><dd class="leise">folgt mit den Kursen (Meilenstein 4)</dd></div>
+        <div><dt>Watchlist heute</dt><dd class="leise">folgt mit den Kursen (Meilenstein 4)</dd></div>
+      </dl>
+    </details>
     <p id="warnung" class="warnung" hidden></p>
   </header>
 

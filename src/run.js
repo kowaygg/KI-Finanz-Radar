@@ -43,6 +43,33 @@ async function quelleHolen(quelle, einstellungen, cache) {
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Wetter für die Kopfzeile (Open-Meteo, ohne Schlüssel). Fehler → kein Wetter, die App blendet es aus.
+async function wetterHolen(wetter, einstellungen) {
+  if (!wetter?.adresse) return null;
+  try {
+    const url = new URL(wetter.adresse);
+    url.search = new URLSearchParams({
+      latitude: wetter.breite, longitude: wetter.laenge, timezone: 'Europe/Berlin', forecast_days: '1',
+      current: 'temperature_2m,weather_code,is_day', daily: 'temperature_2m_max,temperature_2m_min',
+    });
+    const antwort = await fetch(url, { headers: { 'User-Agent': einstellungen.userAgent }, signal: AbortSignal.timeout(10000) });
+    if (!antwort.ok) return null;
+    const d = await antwort.json();
+    const zahl = (w) => (Number.isFinite(w) ? Math.round(w) : null);
+    const ergebnis = {
+      ort: wetter.ort,
+      temperatur: zahl(d.current?.temperature_2m),
+      code: Number.isInteger(d.current?.weather_code) ? d.current.weather_code : null,
+      tag: d.current?.is_day === 1,
+      hoch: zahl(d.daily?.temperature_2m_max?.[0]),
+      tief: zahl(d.daily?.temperature_2m_min?.[0]),
+    };
+    return ergebnis.temperatur === null ? null : ergebnis;
+  } catch {
+    return null;
+  }
+}
+
 export async function abrufStarten() {
   const jetzt = new Date();
   const einstellungen = await jsonLesen(join(WURZEL, 'config', 'einstellungen.json'), null);
@@ -88,6 +115,14 @@ export async function abrufStarten() {
     }
   }
 
+  const wetter = await wetterHolen(einstellungen.wetter, einstellungen);
+  const { boersen } = await jsonLesen(join(WURZEL, 'config', 'boersen.json'), { boersen: [] });
+  const { termine } = await jsonLesen(join(WURZEL, 'config', 'termine.json'), { termine: [] });
+  await jsonSchreiben(join(AUSGABE, 'kalender.json'), {
+    boersen,
+    termine: termine.filter((t) => Date.parse(t.zeit) > jetzt.getTime() - 3600 * 1000).sort((a, b) => Date.parse(a.zeit) - Date.parse(b.zeit)),
+  });
+
   await jsonSchreiben(ZUSTAND, zustand);
   await jsonSchreiben(join(AUSGABE, 'meldungen.json'), { erstellt: jetzt.toISOString(), meldungen: oeffentlicheMeldungen(zustand.meldungen) });
   await jsonSchreiben(join(AUSGABE, 'status.json'), {
@@ -96,6 +131,7 @@ export async function abrufStarten() {
     relevanzSchwelle: einstellungen.relevanzSchwelle,
     quellen: bericht,
     ki,
+    wetter,
   });
   return { bericht, ki };
 }

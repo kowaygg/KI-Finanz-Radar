@@ -1,0 +1,12 @@
+{
+  "_anleitung": "Wichtige Termine für die Kopfzeile (später auch Kalender). Neuer Termin: Zeile kopieren, Datum/Uhrzeit mit Zeitzone (+01:00 Winterzeit, +02:00 Sommerzeit in Deutschland) und Titel anpassen. Vergangene Termine werden automatisch ausgeblendet.",
+  "_quellen": "EZB: Sitzungskalender ecb.europa.eu (Entscheid 14:15 MEZ). Fed: FOMC-Kalender federalreserve.gov (Entscheid 14:00 Ortszeit New York). Geprüft 21.10.2026.",
+  "termine": [
+    { "zeit": "2026-10-28T14:00:00-04:00", "titel": "Fed-Zinsentscheid" },
+    { "zeit": "2026-10-29T14:15:00+01:00", "titel": "EZB-Zinsentscheid" },
+    { "zeit": "2026-12-09T14:00:00-05:00", "titel": "Fed-Zinsentscheid" },
+    { "zeit": "2026-12-17T14:15:00+01:00", "titel": "EZB-Zinsentscheid" },
+    { "zeit": "2027-02-04T14:15:00+01:00", "titel": "EZB-Zinsentscheid" },
+    { "zeit": "2027-03-18T14:15:00+01:00", "titel": "EZB-Zinsentscheid" }
+  ]
+}

@@ -246,6 +246,8 @@ VORGEHEN
 - `src/` – Abruf (Node.js, keine Zusatzpakete): `run.js` (Durchlauf), `feed-parser.js` (RSS/Atom), `bereinigen.js` (nur Text, nur https), `dubletten.js`, `vorfilter.js`, `sammeln.js`
 - `public/` – PWA (index.html mit CSP + noindex, app.js nur textContent, sw.js Offline, manifest, Symbole)
 - `scripts/` – `serve.js` (lokaler Test-Server localhost:8080), `make-icons.js`
+- `config/boersen.json` – Handelszeiten, Feiertage, Frühschluss (Xetra, NYSE; jährlich ergänzen) · `config/termine.json` – Termine (EZB/Fed …) für Kopfzeile/Kalender
+- `public/zeit.js` – Kalenderwoche, Börsenstatus, Countdown, Wettersymbol (ES-Modul, getestet)
 - `config/ki.json` – KI-Kette (Reihenfolge, Modelle, Bündelgrößen, Limits pro Lauf); Schlüsselnamen nur als Variablennamen
 - `src/ki/` – `anweisungen.js` (feste Prompts, Daten-JSON), `pruefen.js` (strenge Prüfung), `kette.js` (Ausweichkette), `analyse.js` (Bewertung → Ereignis-Zusammenfassung → Analyse)
 - `.env` (lokal, ignoriert) / `.env.beispiel` – API-Schlüssel
@@ -263,7 +265,8 @@ VORGEHEN
 ### Offene Punkte
 - Rückfragen: erledigt (21.10.2026)
 - M1 (0.1.0), M2 (0.2.0) und M3 fertig (21.10.2026): online unter https://kowaygg.github.io/KI-Finanz-Radar/ – Abruf alle 15 Min. per GitHub Actions; erster Lauf erfolgreich (10/10 Quellen, Gemini aktiv)
-- Als Nächstes: M4 (Kurse, Watchlist, Kopfzeile)
+- Kopfzeile (0.3.0) vorgezogen: Wochentag, Datum, KW, Uhr mit Sekunden, Xetra/NYSE mit Countdown + Feiertagen, Wetter Freiburg (Open-Meteo, beim Abruf geholt → status.json), nächster Termin, Zähler neue wichtige Meldungen, Stand; Handy: Rest unter „Mehr anzeigen“. Noch offen: Marktstimmung + Watchlist heute (M4), Design-Umschalter (M7)
+- Als Nächstes: M4 (Kurse, Watchlist; Marktstimmung in der Kopfzeile)
 - Dependabot hat einen PR für eine Action-Aktualisierung geöffnet → bei der monatlichen Wartung prüfen (nicht ungeprüft übernehmen)
 - Groq-/Mistral-/OpenRouter-Konten noch nicht angelegt (Kette läuft vorerst nur mit Gemini)
 - Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen

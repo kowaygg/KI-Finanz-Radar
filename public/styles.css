@@ -106,3 +106,22 @@ body {
 .modell { font-size: 0.75rem; color: var(--text-leise); }
 .hinweis { font-size: 0.85rem; color: var(--text-leise); }
 .fuss { font-size: 0.8rem; color: var(--text-leise); padding-top: 20px; padding-bottom: 28px; }
+
+/* Kopfzeile */
+.kopf-uhr { margin-top: 6px; font-size: 1rem; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.uhr { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--akzent); }
+.trenner { color: var(--text-leise); }
+.kopf-boersen { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 6px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.boerse-offen .punkt { color: var(--positiv); font-weight: 600; }
+.boerse-zu .punkt { color: var(--text-leise); }
+.kopf-wichtig { color: var(--akzent); font-weight: 600; }
+.kopf-mehr { margin-top: 8px; font-size: 0.9rem; }
+.kopf-mehr summary { cursor: pointer; color: var(--text-leise); padding: 4px 0; }
+.kopf-liste { margin: 4px 0 0; display: grid; gap: 4px; }
+.kopf-liste > div { display: grid; grid-template-columns: 9.5em 1fr; gap: 8px; }
+.kopf-liste dt { color: var(--text-leise); }
+.kopf-liste dd { margin: 0; }
+.leise { color: var(--text-leise); }
+@media (min-width: 700px) {
+  .kopf-mehr summary { display: none; }
+}

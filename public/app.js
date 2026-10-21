@@ -1,5 +1,5 @@
 // KI-Finanz-Radar – Oberfläche. Feed-Inhalte werden ausschließlich per textContent eingefügt (kein innerHTML).
-'use strict';
+import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wetterSymbol } from './zeit.js';
 
 const ZEITZONE = 'Europe/Berlin';
 const ALARM_NACH_MS = 3 * 60 * 60 * 1000;
@@ -184,6 +184,53 @@ function standAnzeigen(status) {
   if (gestoert.length) stand.title = `Gestörte Quellen: ${gestoert.map((q) => q.name).join(', ')}`;
 }
 
+// ---------- Kopfzeile ----------
+const fmtUhrSek = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+let kalender = { boersen: [], termine: [] };
+let letzterStatus = null;
+
+function boersenText(boerse, jetzt) {
+  const s = boersenStatus(boerse, jetzt);
+  const zeile = element('span', `boerse ${s.offen ? 'boerse-offen' : 'boerse-zu'}`);
+  zeile.append(element('strong', null, boerse.name), ' ');
+  zeile.append(element('span', 'punkt', s.offen ? '● offen' : '○ geschlossen'));
+  if (s.offen) {
+    zeile.append(` · schließt in ${countdown(s.schliesst - jetzt)}${s.fruehschluss ? ' (Frühschluss)' : ''}`);
+  } else if (s.oeffnet) {
+    const rest = s.oeffnet - jetzt;
+    const uhr = new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, hour: '2-digit', minute: '2-digit' }).format(s.oeffnet);
+    zeile.append(rest < 24 * 3600 * 1000 ? ` · öffnet in ${countdown(rest)}` : ` · öffnet ${kurzerTag(s.oeffnet)} ${uhr}`);
+    if (s.feiertag) zeile.append(' (Feiertag)');
+  }
+  return zeile;
+}
+
+function kopfTicken() {
+  const jetzt = new Date();
+  $('datum').textContent = fmtLang.format(jetzt);
+  $('kw').textContent = `KW ${kalenderwoche(jetzt, ZEITZONE)}`;
+  $('uhr').textContent = fmtUhrSek.format(jetzt);
+  $('boersen').replaceChildren(...kalender.boersen.map((b) => boersenText(b, jetzt)));
+  if (letzterStatus && jetzt.getSeconds() === 0) standAnzeigen(letzterStatus);
+  // Termine, die vorbei sind, fallen von selbst weg.
+  const naechster = kalender.termine.find((t) => Date.parse(t.zeit) > jetzt.getTime());
+  $('zeile-termin').hidden = !naechster;
+  if (naechster) $('termin').textContent = `${terminText(new Date(naechster.zeit), jetzt)} ${naechster.titel}`;
+}
+
+function wetterAnzeigen(wetter) {
+  $('zeile-wetter').hidden = !wetter;
+  if (!wetter) return;
+  const [symbol, text] = wetterSymbol(wetter.code, wetter.tag);
+  const hochTief = wetter.hoch !== null && wetter.tief !== null ? ` (↑ ${wetter.hoch}° / ↓ ${wetter.tief}°)` : '';
+  $('wetter').textContent = `${symbol} ${wetter.temperatur} °C ${text}${hochTief} · ${wetter.ort}`;
+}
+
+// Auf dem PC alles offen, auf dem Handy nur das Wichtigste (Rest per Antippen).
+function kopfAufklappen() {
+  $('kopf-mehr').open = window.matchMedia('(min-width: 700px)').matches;
+}
+
 function reiterWechseln(ziel) {
   for (const name of ['ticker', 'wichtig']) {
     const aktiv = name === ziel;
@@ -199,16 +246,19 @@ async function jsonHolen(pfad) {
 }
 
 async function laden() {
-  $('datum').textContent = fmtLang.format(new Date());
   const zuletztGesehen = Number(speicherLesen(SPEICHER_GESEHEN)) || 0;
 
   let status = null;
   let daten = { meldungen: [] };
   try { status = await jsonHolen('data/status.json'); } catch { /* offline */ }
   try { daten = await jsonHolen('data/meldungen.json'); } catch { /* offline */ }
+  try { kalender = await jsonHolen('data/kalender.json'); } catch { /* ohne Börsen/Termine weiter */ }
 
   if (status?.version) $('version').textContent = `Version ${status.version}`;
+  letzterStatus = status;
   standAnzeigen(status);
+  wetterAnzeigen(status?.wetter || null);
+  kopfTicken();
 
   const meldungen = Array.isArray(daten.meldungen) ? daten.meldungen : [];
   const ticker = $('liste-ticker');
@@ -228,6 +278,8 @@ async function laden() {
   const wichtigNeu = zuletztGesehen ? wichtig.filter((m) => Date.parse(m.ki.bewertetAm) > zuletztGesehen).length : wichtig.length;
   $('zaehler-wichtig').hidden = wichtigNeu === 0;
   $('zaehler-wichtig').textContent = String(wichtigNeu);
+  $('kopf-wichtig').hidden = wichtigNeu === 0;
+  $('kopf-wichtig').textContent = wichtigNeu === 1 ? '★ 1 neue wichtige Meldung' : `★ ${wichtigNeu} neue wichtige Meldungen`;
 
   speicherSchreiben(SPEICHER_GESEHEN, String(Date.now()));
 }
@@ -239,4 +291,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* ohne Offline-Modus weiter */ });
 }
 
+kopfAufklappen();
+kopfTicken();
+setInterval(kopfTicken, 1000);
 laden();
