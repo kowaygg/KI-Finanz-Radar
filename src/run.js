@@ -10,6 +10,7 @@ import { eintraegeAufnehmen, alteLoeschen, oeffentlicheMeldungen } from './samme
 import { sichererLink } from './bereinigen.js';
 import { ketteErstellen } from './ki/kette.js';
 import { kiDurchlauf } from './ki/analyse.js';
+import { kurseHolen } from './kurse.js';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -116,6 +117,15 @@ export async function abrufStarten() {
   }
 
   const wetter = await wetterHolen(einstellungen.wetter, einstellungen);
+
+  // Kurse: letzter Stand liegt (wie der Zustand) im Cache-Ordner data/ und dient als Rückfall.
+  const kursEinstellungen = await jsonLesen(join(WURZEL, 'config', 'kurse.json'), null);
+  if (kursEinstellungen) {
+    const letzteKurse = await jsonLesen(join(WURZEL, 'data', 'kurse.json'), null);
+    const kurse = await kurseHolen(kursEinstellungen, letzteKurse, { userAgent: einstellungen.userAgent, jetzt });
+    await jsonSchreiben(join(WURZEL, 'data', 'kurse.json'), kurse);
+    await jsonSchreiben(join(AUSGABE, 'kurse.json'), { ...kurse, zeitraeume: kursEinstellungen.zeitraeume.map(({ schluessel, name }) => ({ schluessel, name })) });
+  }
   const { boersen } = await jsonLesen(join(WURZEL, 'config', 'boersen.json'), { boersen: [] });
   const { termine } = await jsonLesen(join(WURZEL, 'config', 'termine.json'), { termine: [] });
   await jsonSchreiben(join(AUSGABE, 'kalender.json'), {

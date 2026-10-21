@@ -1,0 +1,19 @@
+{
+  "_anleitung": "Indizes für die Kursdiagramme über den Top-News. 'symbol' ist das Kürzel bei der Kursquelle. Zeiträume: Schlüssel = Anzeige in der App, range/interval = Abfrage bei der Quelle.",
+  "quelle": {
+    "name": "Yahoo Finance (verzögert)",
+    "adresse": "https://query1.finance.yahoo.com/v8/finance/chart/"
+  },
+  "indizes": [
+    { "name": "DAX", "land": "Deutschland", "symbol": "^GDAXI" },
+    { "name": "S&P 500", "land": "USA", "symbol": "^GSPC" }
+  ],
+  "zeitraeume": [
+    { "schluessel": "1T", "name": "1 Tag", "range": "1d", "interval": "5m" },
+    { "schluessel": "1W", "name": "1 Woche", "range": "5d", "interval": "30m" },
+    { "schluessel": "1M", "name": "1 Monat", "range": "1mo", "interval": "1d" },
+    { "schluessel": "1J", "name": "1 Jahr", "range": "1y", "interval": "1d" },
+    { "schluessel": "Max", "name": "Maximal", "range": "max", "interval": "1mo" }
+  ],
+  "maxPunkte": 260
+}

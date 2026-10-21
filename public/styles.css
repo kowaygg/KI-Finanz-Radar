@@ -155,3 +155,33 @@ body {
 .top-eintrag .titel:hover, .top-eintrag .titel:focus-visible { color: var(--top-akzent); }
 .top-meta { font-size: 0.8rem; color: var(--text-leise); margin-top: 2px; }
 .top-relevanz { color: var(--top-akzent); font-weight: 600; }
+
+/* Kursdiagramme DAX / S&P 500 */
+.maerkte { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+@media (max-width: 699px) { .maerkte { grid-template-columns: 1fr; } }
+.kurs-karte { background: var(--flaeche); border: 1px solid var(--linie); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.kurs-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.kurs-titel { display: flex; flex-direction: column; }
+.kurs-land { font-size: 0.75rem; color: var(--text-leise); }
+.kurs-titel strong { font-size: 1.05rem; }
+.kurs-wert { display: flex; gap: 8px; align-items: baseline; font-variant-numeric: tabular-nums; }
+.kurs-zahl { font-weight: 700; font-size: 1.05rem; }
+.kurs-pct { font-weight: 600; font-size: 0.9rem; }
+.zeitraum-knoepfe { display: flex; gap: 4px; margin: 8px 0 6px; flex-wrap: wrap; }
+.zeitraum { background: var(--badge-hg); color: var(--text); border: 1px solid transparent; border-radius: 6px; padding: 3px 10px; font: inherit; font-size: 0.8rem; cursor: pointer; }
+.zeitraum[aria-pressed="true"] { border-color: var(--akzent); color: var(--akzent); font-weight: 600; }
+.zeitraum:disabled { opacity: 0.4; cursor: default; }
+.zeitraum:focus-visible { outline: 2px solid var(--akzent); outline-offset: 1px; }
+.kurs-svg { display: block; width: 100%; height: 130px; touch-action: pan-y; }
+.kurve { fill: none; stroke-width: 2; }
+.kurve-positiv { stroke: var(--positiv); }
+.kurve-negativ { stroke: var(--negativ); }
+.kurve-neutral { stroke: var(--text-leise); }
+.flaeche { stroke: none; opacity: 0.14; }
+.flaeche-positiv { fill: var(--positiv); }
+.flaeche-negativ { fill: var(--negativ); }
+.flaeche-neutral { fill: var(--text-leise); }
+.vortag-linie { stroke: var(--text-leise); stroke-dasharray: 4 4; stroke-width: 1; opacity: 0.6; vector-effect: non-scaling-stroke; }
+.zeiger { stroke: var(--text); stroke-width: 1; opacity: 0.7; }
+.kurs-achse { display: flex; justify-content: space-between; gap: 6px; font-size: 0.72rem; color: var(--text-leise); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kurs-fuss { font-size: 0.72rem; color: var(--text-leise); margin-top: 4px; min-height: 1.2em; font-variant-numeric: tabular-nums; }

@@ -27,12 +27,15 @@ async function geminiFragen({ adresse, modell, schluessel, anweisung, nachricht,
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: anweisung }] },
       contents: [{ role: 'user', parts: [{ text: nachricht }] }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+      generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 16384 },
     }),
     signal: AbortSignal.timeout(timeoutMs),
   });
   const daten = await antwortPruefen(antwort);
-  const teile = daten?.candidates?.[0]?.content?.parts || [];
+  const kandidat = daten?.candidates?.[0];
+  // Abgeschnittene oder blockierte Antworten klar benennen (hilft bei der Fehlersuche im Wartungsbericht).
+  if (kandidat?.finishReason && kandidat.finishReason !== 'STOP') throw new KiFehler(`Antwort unvollständig (${kandidat.finishReason})`);
+  const teile = kandidat?.content?.parts || [];
   return teile.filter((t) => !t.thought).map((t) => t.text || '').join('');
 }
 
@@ -52,7 +55,9 @@ async function openaiFragen({ adresse, modell, schluessel, anweisung, nachricht,
     signal: AbortSignal.timeout(timeoutMs),
   });
   const daten = await antwortPruefen(antwort);
-  return daten?.choices?.[0]?.message?.content || '';
+  const wahl = daten?.choices?.[0];
+  if (wahl?.finish_reason && wahl.finish_reason !== 'stop') throw new KiFehler(`Antwort unvollständig (${wahl.finish_reason})`);
+  return wahl?.message?.content || '';
 }
 
 const FRAGEN = { gemini: geminiFragen, openai: openaiFragen };

@@ -1,5 +1,6 @@
 // KI-Finanz-Radar – Oberfläche. Feed-Inhalte werden ausschließlich per textContent eingefügt (kein innerHTML).
 import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wetterSymbol } from './zeit.js';
+import { veraenderung, kurveZeichnen, kursText, zeitBeschriftung, spanneText } from './diagramm.js';
 
 const ZEITZONE = 'Europe/Berlin';
 const ALARM_NACH_MS = 3 * 60 * 60 * 1000;
@@ -241,6 +242,101 @@ function kopfAufklappen() {
   $('kopf-mehr').open = window.matchMedia('(min-width: 700px)').matches;
 }
 
+// ---------- Kursdiagramme (DAX, S&P 500) ----------
+const SPEICHER_ZEITRAUM = 'radar.zeitraum';
+
+function diagrammKarte(index, zeitraeume, quelle) {
+  const karte = element('article', 'kurs-karte');
+  const kopf = element('div', 'kurs-kopf');
+  const titel = element('div', 'kurs-titel');
+  titel.append(element('span', 'kurs-land', index.land), element('strong', null, index.name));
+  const wert = element('div', 'kurs-wert');
+  kopf.append(titel, wert);
+  const knoepfe = element('div', 'zeitraum-knoepfe');
+  knoepfe.setAttribute('role', 'group');
+  knoepfe.setAttribute('aria-label', `Zeitraum ${index.name}`);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.classList.add('kurs-svg');
+  svg.setAttribute('role', 'img');
+  const achse = element('div', 'kurs-achse');
+  const fuss = element('div', 'kurs-fuss');
+  karte.append(kopf, knoepfe, svg, achse, fuss);
+
+  let zeitraum = speicherLesen(`${SPEICHER_ZEITRAUM}.${index.symbol}`) || '1T';
+  if (!index.verlauf?.[zeitraum]) zeitraum = zeitraeume.find((z) => index.verlauf?.[z.schluessel])?.schluessel || '1T';
+  let finde = null;
+
+  function zeichnen() {
+    const punkte = index.verlauf?.[zeitraum] || [];
+    const v = veraenderung(punkte, index.vortag, zeitraum);
+    wert.replaceChildren();
+    if (v) {
+      wert.append(element('span', 'kurs-zahl', kursText(v.letzter)), element('span', `kurs-pct stimmung-${v.richtung}`, v.text));
+    } else {
+      wert.append(element('span', 'leise', 'keine Kurse'));
+    }
+    finde = kurveZeichnen(svg, punkte, v?.richtung || 'neutral', index.vortag, zeitraum);
+    svg.setAttribute('aria-label', v ? `${index.name} ${zeitraeume.find((z) => z.schluessel === zeitraum)?.name}: ${v.text}` : `${index.name}: keine Daten`);
+    achse.replaceChildren();
+    if (punkte.length > 1) {
+      const { min, max } = spanneText(punkte);
+      achse.append(
+        element('span', null, zeitBeschriftung(punkte[0][0], zeitraum)),
+        element('span', 'leise', `Tief ${kursText(min)} · Hoch ${kursText(max)}`),
+        element('span', null, zeitBeschriftung(punkte[punkte.length - 1][0], zeitraum)),
+      );
+    }
+    const stand = index.stand?.[zeitraum];
+    fuss.textContent = stand ? `Stand ${new Intl.DateTimeFormat('de-DE', { timeZone: ZEITZONE, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(stand))} · ${quelle}` : quelle;
+    for (const k of knoepfe.children) k.setAttribute('aria-pressed', String(k.dataset.zeitraum === zeitraum));
+  }
+
+  for (const z of zeitraeume) {
+    const knopf = element('button', 'zeitraum', z.schluessel);
+    knopf.type = 'button';
+    knopf.title = z.name;
+    knopf.dataset.zeitraum = z.schluessel;
+    knopf.disabled = !index.verlauf?.[z.schluessel];
+    knopf.addEventListener('click', () => {
+      zeitraum = z.schluessel;
+      speicherSchreiben(`${SPEICHER_ZEITRAUM}.${index.symbol}`, zeitraum);
+      zeichnen();
+    });
+    knoepfe.append(knopf);
+  }
+
+  // Finger oder Maus über der Kurve: Kurs zu diesem Zeitpunkt anzeigen.
+  const zeigen = (e) => {
+    if (!finde) return;
+    const r = svg.getBoundingClientRect();
+    const p = finde((e.clientX - r.left) / r.width);
+    if (p) fuss.textContent = `${zeitBeschriftung(p[0], zeitraum === 'Max' || zeitraum === '1J' ? '1J' : '1W')} · ${kursText(p[1])}`;
+  };
+  svg.addEventListener('pointermove', zeigen);
+  svg.addEventListener('pointerdown', zeigen);
+  svg.addEventListener('pointerleave', () => { if (finde) finde(null); zeichnen(); });
+
+  zeichnen();
+  return karte;
+}
+
+function maerkteAnzeigen(kurse) {
+  const indizes = (kurse?.indizes || []).filter((i) => Object.keys(i.verlauf || {}).length);
+  $('maerkte').hidden = indizes.length === 0;
+  $('maerkte').replaceChildren(...indizes.map((i) => diagrammKarte(i, kurse.zeitraeume || [], kurse.quelle || '')));
+
+  // Marktstimmung für die Kopfzeile aus der Tagesveränderung.
+  const tag = indizes.map((i) => ({ name: i.name, v: veraenderung(i.verlauf['1T'], i.vortag, '1T') })).filter((t) => t.v);
+  $('zeile-stimmung').hidden = tag.length === 0;
+  if (tag.length) {
+    const hoch = tag.filter((t) => t.v.pct > 0).length;
+    const gesamt = hoch === tag.length ? '▲ freundlich' : hoch === 0 ? '▼ schwach' : '◆ gemischt';
+    const klasse = hoch === tag.length ? 'positiv' : hoch === 0 ? 'negativ' : 'neutral';
+    const dd = $('stimmung');
+    dd.replaceChildren(element('strong', `stimmung-${klasse}`, gesamt), ` · ${tag.map((t) => `${t.name} ${t.v.text}`).join(' · ')}`);
+  }
+}
+
 // Die 3 wichtigsten Meldungen der letzten 24 Stunden (höchste KI-Relevanz, bei Gleichstand die neueste).
 function topNewsAnzeigen(meldungen) {
   const grenze = Date.now() - 24 * 3600 * 1000;
@@ -284,6 +380,7 @@ async function laden() {
   try { status = await jsonHolen('data/status.json'); } catch { /* offline */ }
   try { daten = await jsonHolen('data/meldungen.json'); } catch { /* offline */ }
   try { kalender = await jsonHolen('data/kalender.json'); } catch { /* ohne Börsen/Termine weiter */ }
+  try { maerkteAnzeigen(await jsonHolen('data/kurse.json')); } catch { /* ohne Diagramme weiter */ }
 
   if (status?.version) $('version').textContent = `Version ${status.version}`;
   letzterStatus = status;

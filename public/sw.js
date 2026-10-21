@@ -1,8 +1,8 @@
 // Offline-Modus: Alles zuerst aus dem Netz holen, bei fehlender Verbindung die zuletzt geladene Fassung zeigen.
 // (Der Hinweis „Neue Version verfügbar“ kommt mit Meilenstein 7.)
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 const SPEICHER = `radar-${VERSION}`;
-const GRUNDGERUEST = ['./', 'index.html', 'styles.css', 'app.js', 'zeit.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
+const GRUNDGERUEST = ['./', 'index.html', 'styles.css', 'app.js', 'zeit.js', 'diagramm.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SPEICHER).then((c) => c.addAll(GRUNDGERUEST)));
