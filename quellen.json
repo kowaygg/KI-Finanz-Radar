@@ -86,9 +86,9 @@
       "aktiv": true
     },
     {
-      "name": "Bundesfinanzministerium",
-      "url": "https://www.bundesfinanzministerium.de/SiteGlobals/Functions/RSSFeed/DE/Pressemitteilungen/RSSPressemitteilungen.xml",
-      "kategorie": "Finanzen & Vorsorge",
+      "name": "Bundesregierung",
+      "url": "https://www.bundesregierung.de/service/rss/breg-de/1151244/feed.xml",
+      "kategorie": "Politik mit Marktbezug",
       "sprache": "de",
       "aktiv": true
     },
