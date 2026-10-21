@@ -219,13 +219,23 @@ VORGEHEN
 ### Entscheidungen
 - 21.10.2026: Ergänzungen A2 übernommen (Windows 10, KI-Ausweichkette 3–4 Modelle, Vorfilter ohne KI, Vault-Doku)
 - 21.10.2026: Git-Repo angelegt (Branch `main`), Commit-Identität nur lokal im Repo eingestellt (noreply-Adresse). Im Repo keine echten Namen/Pfade – Benutzerordner als `%USERPROFILE%`
-- Weitere Entscheidungen warten auf Antworten zu den Rückfragen
+- 21.10.2026: KI-Ausweichkette festgelegt: Gemini → Groq → Mistral → OpenRouter (alle ohne Kreditkarte; Mistral braucht Handynummer; OpenRouter ohne Guthaben nur ~50 Anfragen/Tag → letzte Reserve). Konten werden erst beim Einbau angelegt.
+- 21.10.2026: Handy = Android (PWA-Installation über Chrome; iPhone-Anleitung nur nebenbei)
+- 21.10.2026: Push über ntfy (ntfy.sh, Android-App): Relevanz 9–10, Wartungsbericht sonntags, Warnung bei Abruf-Ausfall >3 h. Langer Zufalls-Kanalname, nur öffentliche Inhalte
+- 21.10.2026: Englische Quellen erlaubt; „Wichtig“ immer Deutsch, Live-Ticker zeigt Original-Überschrift (spart Kontingent)
+- 21.10.2026: Regionen: Schwerpunkt DE/EU + USA; Asien nur große Themen (China, Taiwan/TSMC, Japan, Zölle). Krypto-News ja, nur große Bewegungen und Regulierung (keine Kleinst-Coins)
+- 21.10.2026: Watchlist bis ca. 10 Werte; Werte ohne freien Kurs zeigen nur News
+- 21.10.2026: Watchlist-Kurse = Variante B: Cloud lädt Kurse einer großen öffentlichen Werteliste (einige hundert: DAX, MSCI World, S&P 500, Nasdaq, beliebte ETFs); die App filtert die Watchlist NUR lokal. Die Werteliste darf nie gezielt nach der Watchlist zusammengestellt werden; einzelne fehlende Werte nur nach ausdrücklichem OK des Nutzers ergänzen, sonst nur News
+- 21.10.2026: News-Abruf alle 15 Minuten (GitHub-Actions-Cron; Verzögerungen ok)
+- 21.10.2026: Repo-Name `ki-finanz-radar` (öffentlich, Adresse https://kowaygg.github.io/ki-finanz-radar/); App-Name „KI-Finanzradar“
+- 21.10.2026: Technik: Node.js (schon installiert), kein Python
+- Alle Rückfragen vom 21.10.2026 beantwortet
 
 ### Aufbau
 - `CLAUDE.md` – diese Datei
 - `.gitignore` – schließt `.env`, lokale Importdateien (`*.local.*`, `watchlist*.json`) usw. aus
 
 ### Offene Punkte
-- Rückfragen an den Nutzer (Stand 21.10.2026) beantworten lassen
-- Danach: Plan mit Meilensteinen + Abschätzung der Gratis-Grenzen
-- Git-Repo anlegen (`git init`) nach OK
+- Rückfragen: erledigt (21.10.2026)
+- Als Nächstes: Plan mit Meilensteinen + Abschätzung der Gratis-Grenzen (Feeds, Kursquellen, KI prüfen)
+- Leeres öffentliches Repo `ki-finanz-radar` auf GitHub anlegen und verbinden (erst wenn Version 1 steht)
