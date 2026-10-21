@@ -182,6 +182,11 @@ function standAnzeigen(status) {
   stand.classList.toggle('alt', alt);
   warnung.hidden = !alt;
   if (alt) warnung.textContent = '⚠ Der automatische Abruf lief seit über 3 Stunden nicht. Die Meldungen sind nicht aktuell.';
+  // Lokale Testkopie (npm start) aktualisiert sich nicht von selbst – deutlich kennzeichnen, damit es nicht verwechselt wird.
+  if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+    warnung.hidden = false;
+    warnung.textContent = `🛠 Lokale Testversion auf diesem PC – aktualisiert sich nicht automatisch. Die echte App: kowaygg.github.io/KI-Finanz-Radar${alt ? ' · Daten älter als 3 Stunden' : ''}`;
+  }
   const gestoert = (status.quellen || []).filter((q) => !q.ok);
   if (gestoert.length) stand.title = `Gestörte Quellen: ${gestoert.map((q) => q.name).join(', ')}`;
 }
