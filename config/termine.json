@@ -1,19 +1,113 @@
 {
-  "_anleitung": "Wichtige Termine für den Reiter „Termine“. Neuer Termin: Zeile kopieren, Zeit mit Zeitzone der Quelle angeben (Deutschland +01:00 Winter / +02:00 Sommer, New York -05:00 Winter / -04:00 Sommer), Titel, Art (Zinsentscheid, Konjunktur, Quartalszahlen …), Land, status 'bestätigt' oder 'erwartet'. Vergangene Termine werden automatisch ausgeblendet.",
-  "_quellen": "EZB: ecb.europa.eu Sitzungskalender (14:15 MEZ). Fed: FOMC-Kalender (14:00 New York). US-Arbeitsmarkt/CPI: bls.gov Schedule 2026 (Dezember vorläufig). ifo: ifo.de (10:00 über Ticker). Nvidia: Quartalszahlen erwartet laut Wall Street Horizon/MarketBeat (nicht bestätigt). Geprüft 21.10.2026.",
+  "_anleitung": "Wichtige Termine für den Reiter „Termine“. Neuer Termin: Zeile kopieren, Zeit mit Zeitzone der Quelle angeben (Deutschland +01:00 Winter / +02:00 Sommer, New York -05:00 Winter / -04:00 Sommer), Titel, Art (Zinsentscheid, Konjunktur, Quartalszahlen …), Land, status 'bestätigt' oder 'erwartet'. Vergangene Termine werden automatisch ausgeblendet. Optional: info = kurzer Erklärtext.",
+  "_quellen": "EZB: ecb.europa.eu Sitzungskalender (14:15 MEZ). Fed: FOMC-Kalender (14:00 New York). US-Arbeitsmarkt/CPI: bls.gov Schedule 2026 (Dezember vorläufig). ifo: ifo.de (10:00 über Ticker). Nvidia: Quartalszahlen erwartet laut Wall Street Horizon/MarketBeat (nicht bestätigt). Geprüft 21.10.2026. Altersvorsorgedepot: Altersvorsorgereformgesetz (Bundestag 27.03.2026, Bundesrat 08.05.2026, Start 01.01.2027). Frühstart-Rente: Bundestag 16.10.2026, Bundesrat ausstehend.",
   "termine": [
-    { "zeit": "2026-10-26T10:00:00+01:00", "titel": "ifo-Geschäftsklima Oktober", "art": "Konjunktur", "land": "Deutschland", "status": "bestätigt" },
-    { "zeit": "2026-10-28T14:00:00-04:00", "titel": "Fed-Zinsentscheid", "art": "Zinsentscheid", "land": "USA", "status": "bestätigt" },
-    { "zeit": "2026-10-29T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" },
-    { "zeit": "2026-11-06T08:30:00-05:00", "titel": "US-Arbeitsmarktbericht Oktober", "art": "Konjunktur", "land": "USA", "status": "bestätigt" },
-    { "zeit": "2026-11-18T16:05:00-05:00", "titel": "Nvidia Quartalszahlen (Q3)", "art": "Quartalszahlen", "land": "USA", "status": "erwartet" },
-    { "zeit": "2026-11-24T10:00:00+01:00", "titel": "ifo-Geschäftsklima November", "art": "Konjunktur", "land": "Deutschland", "status": "bestätigt" },
-    { "zeit": "2026-12-04T08:30:00-05:00", "titel": "US-Arbeitsmarktbericht November", "art": "Konjunktur", "land": "USA", "status": "erwartet" },
-    { "zeit": "2026-12-09T14:00:00-05:00", "titel": "Fed-Zinsentscheid", "art": "Zinsentscheid", "land": "USA", "status": "bestätigt" },
-    { "zeit": "2026-12-10T08:30:00-05:00", "titel": "US-Inflation (CPI) November", "art": "Konjunktur", "land": "USA", "status": "erwartet" },
-    { "zeit": "2026-12-17T10:00:00+01:00", "titel": "ifo-Geschäftsklima Dezember", "art": "Konjunktur", "land": "Deutschland", "status": "bestätigt" },
-    { "zeit": "2026-12-17T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" },
-    { "zeit": "2027-02-04T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" },
-    { "zeit": "2027-03-18T14:15:00+01:00", "titel": "EZB-Zinsentscheid", "art": "Zinsentscheid", "land": "Eurozone", "status": "bestätigt" }
+    {
+      "zeit": "2026-10-26T10:00:00+01:00",
+      "titel": "ifo-Geschäftsklima Oktober",
+      "art": "Konjunktur",
+      "land": "Deutschland",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-10-28T14:00:00-04:00",
+      "titel": "Fed-Zinsentscheid",
+      "art": "Zinsentscheid",
+      "land": "USA",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-10-29T14:15:00+01:00",
+      "titel": "EZB-Zinsentscheid",
+      "art": "Zinsentscheid",
+      "land": "Eurozone",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-11-06T08:30:00-05:00",
+      "titel": "US-Arbeitsmarktbericht Oktober",
+      "art": "Konjunktur",
+      "land": "USA",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-11-18T16:05:00-05:00",
+      "titel": "Nvidia Quartalszahlen (Q3)",
+      "art": "Quartalszahlen",
+      "land": "USA",
+      "status": "erwartet"
+    },
+    {
+      "zeit": "2026-11-24T10:00:00+01:00",
+      "titel": "ifo-Geschäftsklima November",
+      "art": "Konjunktur",
+      "land": "Deutschland",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-12-04T08:30:00-05:00",
+      "titel": "US-Arbeitsmarktbericht November",
+      "art": "Konjunktur",
+      "land": "USA",
+      "status": "erwartet"
+    },
+    {
+      "zeit": "2026-12-09T14:00:00-05:00",
+      "titel": "Fed-Zinsentscheid",
+      "art": "Zinsentscheid",
+      "land": "USA",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-12-10T08:30:00-05:00",
+      "titel": "US-Inflation (CPI) November",
+      "art": "Konjunktur",
+      "land": "USA",
+      "status": "erwartet"
+    },
+    {
+      "zeit": "2026-12-17T10:00:00+01:00",
+      "titel": "ifo-Geschäftsklima Dezember",
+      "art": "Konjunktur",
+      "land": "Deutschland",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2026-12-17T14:15:00+01:00",
+      "titel": "EZB-Zinsentscheid",
+      "art": "Zinsentscheid",
+      "land": "Eurozone",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2027-01-01T00:00:00+01:00",
+      "titel": "Start Altersvorsorgedepot (Riester-Nachfolger)",
+      "art": "Finanzen & Vorsorge",
+      "land": "Deutschland",
+      "status": "bestätigt",
+      "info": "Staatliche Zulage bis 540 € pro Jahr (50 Cent je Euro auf die ersten 360 €, danach 25 Cent bis 1.800 € Eigenbeitrag); Anbieter wie Banken und Broker starten ihre Angebote."
+    },
+    {
+      "zeit": "2027-01-01T00:00:01+01:00",
+      "titel": "Geplanter Start Frühstart-Rente (Jahrgang 2020)",
+      "art": "Finanzen & Vorsorge",
+      "land": "Deutschland",
+      "status": "erwartet",
+      "info": "Bundestag hat am 16.10.2026 beschlossen, Zustimmung des Bundesrats steht noch aus. Erste Einzahlungen 2027."
+    },
+    {
+      "zeit": "2027-02-04T14:15:00+01:00",
+      "titel": "EZB-Zinsentscheid",
+      "art": "Zinsentscheid",
+      "land": "Eurozone",
+      "status": "bestätigt"
+    },
+    {
+      "zeit": "2027-03-18T14:15:00+01:00",
+      "titel": "EZB-Zinsentscheid",
+      "art": "Zinsentscheid",
+      "land": "Eurozone",
+      "status": "bestätigt"
+    }
   ]
 }

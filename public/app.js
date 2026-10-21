@@ -293,6 +293,7 @@ function termineAnzeigen(jetzt) {
       if (t.land) info.append(element('span', 'badge', t.land));
       if (t.status === 'erwartet') info.append(element('span', 'badge termin-erwartet', 'erwartet'));
       zeile.append(info, element('span', 'termin-abstand', abstandText(zeitpunkt, jetzt)));
+      if (t.info) zeile.append(element('span', 'termin-text', t.info));
       gruppe.append(zeile);
     }
     return gruppe;

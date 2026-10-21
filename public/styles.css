@@ -253,3 +253,5 @@ main { padding-bottom: 8px; }
   .termin-titel { grid-column: 1 / -1; }
   .termin-info { grid-column: 1; justify-content: flex-start; }
 }
+.termin-text { grid-column: 1 / -1; font-size: 0.85rem; color: var(--text-leise); }
+@media (min-width: 700px) { .termin-text { grid-column: 2 / -1; } }

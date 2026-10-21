@@ -1,7 +1,7 @@
 // Feste Anweisungen für ALLE Modelle der Kette – damit die Bewertung einheitlich bleibt.
 // News-Texte werden nur als Daten übergeben (Schutz vor Prompt Injection).
 
-export const KATEGORIEN = ['Wirtschaft', 'Börse', 'KI', 'Tech', 'Politik mit Marktbezug', 'Unternehmen', 'Startups & Finanzierungsrunden'];
+export const KATEGORIEN = ['Wirtschaft', 'Börse', 'KI', 'Tech', 'Politik mit Marktbezug', 'Unternehmen', 'Startups & Finanzierungsrunden', 'Finanzen & Vorsorge'];
 export const STIMMUNGEN = ['positiv', 'neutral', 'negativ'];
 export const ZEITHORIZONTE = ['kurzfristig', 'langfristig', 'beides'];
 export const SICHERHEITEN = ['niedrig', 'mittel', 'hoch'];
@@ -29,8 +29,10 @@ AUFGABE: Bewerte jede Meldung.
   analyse = sachliche Einordnung von Märkten/Unternehmen/Konjunktur
   meinung = Kommentar, Gastbeitrag, Kolumne
   ratgeber = persönliche Finanztipps, Spartipps, „So geht's“, Kredit-/Kartenangebote, Karriere-/Lebenstipps, Fallbeispiele einzelner Personen
+  WICHTIG: Berichte über neue Gesetze, Beschlüsse, Fristen, Förderungen, Steuer- und Rentenänderungen oder Entscheidungen von Banken/Aufsicht sind KEIN Ratgeber, sondern nachricht – auch wenn sie erklären, was sich für Anleger ändert
   unterhaltung = Lifestyle, Kurioses, Geschichten ohne Marktbezug, Gesundheit, Reisen, Sport, Promis
-- passt: true nur, wenn es um Wirtschaft, Börse, Unternehmen, KI/Tech-Branche, Zentralbanken, Konjunktur oder Politik mit klarer Marktwirkung geht; sonst false
+- passt: true nur, wenn es um Wirtschaft, Börse, Unternehmen, KI/Tech-Branche, Zentralbanken, Konjunktur, Politik mit klarer Marktwirkung oder Finanzen & Vorsorge geht
+  (Finanzen & Vorsorge = Banken, Broker, Finanzaufsicht, Steuern auf Kapitalerträge, Rente/Altersvorsorge, staatliche Förderung wie Altersvorsorgedepot oder Frühstart-Rente, neue Finanzgesetze); sonst false
 - titelDe: NUR bei Meldungen mit "sprache":"en" – sachliche deutsche Übersetzung der Überschrift; bei deutschen Meldungen weglassen
 - ereignis: kurzes Kürzel für das konkrete Ereignis, nur Kleinbuchstaben, Ziffern und Bindestriche (z. B. "tesla-spacex-fusion", "ezb-zinsentscheid-oktober").
   Meldungen über DASSELBE Ereignis (auch in verschiedenen Sprachen oder Formulierungen) bekommen dasselbe Kürzel.
