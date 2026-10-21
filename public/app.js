@@ -210,7 +210,16 @@ function kopfTicken() {
   $('datum').textContent = fmtLang.format(jetzt);
   $('kw').textContent = `KW ${kalenderwoche(jetzt, ZEITZONE)}`;
   $('uhr').textContent = fmtUhrSek.format(jetzt);
-  $('boersen').replaceChildren(...kalender.boersen.map((b) => boersenText(b, jetzt)));
+  // Nach Land gruppiert: „Deutschland: Xetra … · Börse Frankfurt …“, „USA: NYSE … · Nasdaq …“
+  const laender = [...new Set(kalender.boersen.map((b) => b.land || ''))];
+  $('boersen').replaceChildren(...laender.map((land) => {
+    const zeile = element('div', 'boersen-land');
+    zeile.append(element('span', 'land', land ? `${land}:` : ''));
+    const liste = element('span', 'boersen-liste');
+    liste.append(...kalender.boersen.filter((b) => (b.land || '') === land).map((b) => boersenText(b, jetzt)));
+    zeile.append(liste);
+    return zeile;
+  }));
   if (letzterStatus && jetzt.getSeconds() === 0) standAnzeigen(letzterStatus);
   // Termine, die vorbei sind, fallen von selbst weg.
   const naechster = kalender.termine.find((t) => Date.parse(t.zeit) > jetzt.getTime());

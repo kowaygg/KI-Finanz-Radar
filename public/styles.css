@@ -111,7 +111,16 @@ body {
 .kopf-uhr { margin-top: 6px; font-size: 1rem; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
 .uhr { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--akzent); }
 .trenner { color: var(--text-leise); }
-.kopf-boersen { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 6px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.kopf-boersen { display: grid; gap: 3px; margin-top: 6px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.boersen-land { display: grid; grid-template-columns: 6.5em 1fr; gap: 6px; align-items: baseline; }
+.land { color: var(--text-leise); }
+.boersen-liste { display: flex; flex-wrap: wrap; gap: 2px 16px; }
+.boerse { white-space: nowrap; }
+@media (max-width: 699px) {
+  .boersen-land { grid-template-columns: 1fr; gap: 0; }
+  .land { font-size: 0.8rem; }
+  .boersen-liste { flex-direction: column; }
+}
 .boerse-offen .punkt { color: var(--positiv); font-weight: 600; }
 .boerse-zu .punkt { color: var(--text-leise); }
 .kopf-wichtig { color: var(--akzent); font-weight: 600; }

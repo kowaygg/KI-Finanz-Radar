@@ -1,9 +1,10 @@
 {
-  "_anleitung": "Handelszeiten und Feiertage der Börsen. Jedes Jahr im Herbst die Feiertage fürs nächste Jahr ergänzen (Quellen: xetra.com Handelskalender, NYSE Holidays). Zeiten in Ortszeit der Börse.",
-  "_quellen": "Xetra: Deutsche Börse Handelskalender 2026 (2027 vorläufig). NYSE: NYSE Group Holiday Calendar 2026–2028 (Stand 23.12.2025). Geprüft 21.10.2026.",
+  "_anleitung": "Handelszeiten und Feiertage der Börsen, gruppiert nach 'land' (so erscheinen sie in der Kopfzeile). Jedes Jahr im Herbst die Feiertage fürs nächste Jahr ergänzen (Quellen: xetra.com / live.deutsche-boerse.com Handelskalender, NYSE/Nasdaq Holidays). Zeiten in Ortszeit der Börse.",
+  "_quellen": "Xetra + Börse Frankfurt: Deutsche Börse Handelskalender 2026 (2027 vorläufig), Frankfurt 8–22 Uhr laut xetra.com. NYSE: NYSE Group Holiday Calendar 2026–2028 (23.12.2025). Nasdaq: gleiche Zeiten/Feiertage, Frühschluss 27.11. + 24.12.2026 laut nasdaq.com. Geprüft 21.10.2026.",
   "boersen": [
     {
       "name": "Xetra",
+      "land": "Deutschland",
       "zeitzone": "Europe/Berlin",
       "oeffnung": "09:00",
       "schluss": "17:30",
@@ -12,7 +13,28 @@
       "fruehschluss": {}
     },
     {
+      "name": "Börse Frankfurt",
+      "land": "Deutschland",
+      "zeitzone": "Europe/Berlin",
+      "oeffnung": "08:00",
+      "schluss": "22:00",
+      "feiertage": ["2026-01-01", "2026-04-03", "2026-04-06", "2026-05-01", "2026-12-24", "2026-12-25", "2026-12-31",
+                    "2027-01-01", "2027-03-26", "2027-03-29", "2027-12-24", "2027-12-31"],
+      "fruehschluss": {}
+    },
+    {
       "name": "NYSE",
+      "land": "USA",
+      "zeitzone": "America/New_York",
+      "oeffnung": "09:30",
+      "schluss": "16:00",
+      "feiertage": ["2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
+                    "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31", "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24"],
+      "fruehschluss": { "2026-11-27": "13:00", "2026-12-24": "13:00", "2027-11-26": "13:00" }
+    },
+    {
+      "name": "Nasdaq",
+      "land": "USA",
       "zeitzone": "America/New_York",
       "oeffnung": "09:30",
       "schluss": "16:00",
