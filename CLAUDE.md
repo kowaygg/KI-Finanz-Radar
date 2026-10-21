@@ -268,7 +268,8 @@ VORGEHEN
 - Rückfragen: erledigt (21.10.2026)
 - M1 (0.1.0), M2 (0.2.0) und M3 fertig (21.10.2026): online unter https://kowaygg.github.io/KI-Finanz-Radar/ – Abruf alle 15 Min. per GitHub Actions; erster Lauf erfolgreich (10/10 Quellen, Gemini aktiv)
 - Kopfzeile (0.3.0) vorgezogen: Wochentag, Datum, KW, Uhr mit Sekunden, Börsen nach Land gruppiert (Deutschland: Xetra + Börse Frankfurt 8–22 Uhr; USA: NYSE + Nasdaq) mit Countdown + Feiertagen, Wetter Freiburg (Open-Meteo, beim Abruf geholt → status.json), nächster Termin, Zähler neue wichtige Meldungen, Stand; Handy: Rest unter „Mehr anzeigen“. Darunter Kasten „Top-News der letzten 24 Stunden“ (warmes Lila #d59bf6, 3 höchste KI-Relevanzen, ohne Dubletten). App lädt alle 5 Min. und beim Zurückkehren neu (Neu-Markierung bleibt pro Sitzung). Über den Top-News (0.4.0): zwei Kurven-Diagramme DAX + S&P 500 nebeneinander (Handy untereinander) mit Zeitraum 1T/1W/1M/1J/Max (Auswahl wird gemerkt), Kurs + Veränderung ▲/▼, Tief/Hoch, Finger/Maus zeigt Kurs am Zeitpunkt; Marktstimmung in der Kopfzeile aus Tagesveränderung DAX + S&P 500. Noch offen: Watchlist heute (M4), Ausweich-Kursquelle (M4), Design-Umschalter (M7)
-- Als Nächstes: M4 (Kurse, Watchlist; Marktstimmung in der Kopfzeile)
+- 0.4.0 online (21.10.2026 abends geprüft): Kurse laden von GitHub aus, KI-Kette greift (3.8 Flash 429 → 3.5 Flash-Lite). Geplante Läufe real ca. alle 35–50 Min. (GitHub-Verzögerung)
+- Als Nächstes: M4 (Watchlist, Ausweich-Kursquelle), Groq-Konto anlegen
 - Dependabot hat einen PR für eine Action-Aktualisierung geöffnet → bei der monatlichen Wartung prüfen (nicht ungeprüft übernehmen)
 - Groq-/Mistral-/OpenRouter-Konten noch nicht angelegt (Kette läuft vorerst nur mit Gemini)
 - Ersatz-Kursquelle finden (Stooq-CSV liefert 404); Yahoo-Nutzungsbedingungen prüfen
