@@ -76,6 +76,73 @@ function meldungElement(m, zuletztGesehen) {
   return li;
 }
 
+const STIMMUNG = { positiv: '▲ positiv', neutral: '● neutral', negativ: '▼ negativ' };
+
+function chips(titel, werte) {
+  if (!Array.isArray(werte) || !werte.length) return null;
+  const zeile = element('div', 'chip-zeile');
+  zeile.append(element('span', 'chip-titel', `${titel}:`));
+  for (const w of werte) zeile.append(element('span', 'chip', w));
+  return zeile;
+}
+
+// Ausführliche Darstellung im Reiter „Wichtig“.
+function wichtigElement(m) {
+  const ki = m.ki;
+  const analyse = ki.analyse;
+  const li = element('li', 'meldung karte');
+
+  const meta = element('div', 'meta');
+  const zeit = element('time', 'zeit', zeitText(m.datum));
+  zeit.dateTime = m.datum;
+  meta.append(
+    zeit,
+    element('span', null, m.quelle),
+    element('span', 'badge', m.kategorie),
+    element('span', 'badge relevanz', `Relevanz ${ki.relevanz}/10`),
+    element('span', `stimmung stimmung-${ki.stimmung}`, STIMMUNG[ki.stimmung] || ''),
+  );
+  li.append(meta);
+
+  const link = sichererLink(m.link);
+  const titel = element(link ? 'a' : 'span', 'titel', analyse?.titel || m.titel);
+  if (link) {
+    titel.href = link;
+    titel.target = '_blank';
+    titel.rel = 'noopener noreferrer';
+  }
+  li.append(titel);
+  if (analyse?.titel && analyse.titel !== m.titel) li.append(element('div', 'original', `Original: ${m.titel}`));
+
+  const schlag = chips('Themen', ki.schlagwoerter);
+  if (schlag) li.append(schlag);
+
+  if (!analyse) {
+    li.append(element('p', 'hinweis', 'Ausführliche Analyse folgt beim nächsten Abruf.'));
+    return li;
+  }
+
+  const punkte = element('ul', 'punkte');
+  for (const p of analyse.zusammenfassung) punkte.append(element('li', null, p));
+  li.append(punkte);
+
+  for (const [name, werte] of [['Aktien', analyse.betroffen?.aktien], ['ETFs', analyse.betroffen?.etfs], ['Branchen', analyse.betroffen?.branchen]]) {
+    const z = chips(name, werte);
+    if (z) li.append(z);
+  }
+
+  const box = element('div', 'einschaetzung');
+  box.append(element('div', 'einschaetzung-titel', `KI-Einschätzung · ${analyse.einschaetzung.zeithorizont} · Sicherheit: ${analyse.einschaetzung.sicherheit}`));
+  box.append(element('p', null, analyse.einschaetzung.text));
+  if (analyse.vergleich) box.append(element('p', 'vergleich', `Historischer Vergleich: ${analyse.vergleich}`));
+  box.append(element('div', 'modell', `Analysiert von ${analyse.dienst} (${analyse.modell}) · keine Anlageberatung`));
+  li.append(box);
+
+  const weitere = (m.quellen || []).filter((q) => q.name !== m.quelle && sichererLink(q.link));
+  if (weitere.length) li.append(element('div', 'weitere', `Auch bei: ${weitere.map((q) => q.name).join(', ')}`));
+  return li;
+}
+
 function standAnzeigen(status) {
   const stand = $('stand');
   const warnung = $('warnung');
@@ -133,10 +200,11 @@ async function laden() {
 
   const schwelle = Number(status?.relevanzSchwelle) || 7;
   const wichtig = meldungen.filter((m) => Number(m.ki?.relevanz) >= schwelle);
-  $('liste-wichtig').replaceChildren(...wichtig.map((m) => meldungElement(m, zuletztGesehen)));
+  $('liste-wichtig').replaceChildren(...wichtig.map((m) => wichtigElement(m)));
   $('wichtig-leer').hidden = wichtig.length > 0;
-  $('zaehler-wichtig').hidden = wichtig.length === 0;
-  $('zaehler-wichtig').textContent = String(wichtig.length);
+  const wichtigNeu = zuletztGesehen ? wichtig.filter((m) => Date.parse(m.ki.bewertetAm) > zuletztGesehen).length : wichtig.length;
+  $('zaehler-wichtig').hidden = wichtigNeu === 0;
+  $('zaehler-wichtig').textContent = String(wichtigNeu);
 
   speicherSchreiben(SPEICHER_GESEHEN, String(Date.now()));
 }

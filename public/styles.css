@@ -8,6 +8,8 @@
   --warnung-hg: #5a1f1f;
   --warnung-text: #ffd9d9;
   --badge-hg: #2b2f37;
+  --positiv: #6fd08c;
+  --negativ: #ff8a80;
   color-scheme: dark;
 }
 
@@ -84,4 +86,23 @@ body {
 .weitere a { color: var(--text-leise); }
 
 .leer { color: var(--text-leise); padding: 24px 0; }
+
+.karte { padding: 16px 0; }
+.relevanz { color: var(--akzent); font-weight: 600; }
+.stimmung { font-weight: 600; }
+.stimmung-positiv { color: var(--positiv); }
+.stimmung-negativ { color: var(--negativ); }
+.stimmung-neutral { color: var(--text-leise); }
+.original { font-size: 0.8rem; color: var(--text-leise); margin-top: 2px; }
+.punkte { margin: 8px 0; padding-left: 20px; }
+.punkte li { margin: 3px 0; }
+.chip-zeile { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; margin-top: 6px; font-size: 0.85rem; }
+.chip-titel { color: var(--text-leise); }
+.chip { background: var(--badge-hg); border-radius: 999px; padding: 1px 9px; }
+.einschaetzung { margin-top: 10px; padding: 10px 12px; background: var(--flaeche); border-radius: 8px; border-left: 4px solid var(--akzent); }
+.einschaetzung p { margin: 6px 0; }
+.einschaetzung-titel { font-size: 0.85rem; font-weight: 600; color: var(--akzent); }
+.vergleich { font-size: 0.9rem; color: var(--text-leise); }
+.modell { font-size: 0.75rem; color: var(--text-leise); }
+.hinweis { font-size: 0.85rem; color: var(--text-leise); }
 .fuss { font-size: 0.8rem; color: var(--text-leise); padding-top: 20px; padding-bottom: 28px; }

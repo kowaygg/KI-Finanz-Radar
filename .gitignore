@@ -1,6 +1,7 @@
 # Geheimnisse – niemals ins Repo
 .env
 .env.*
+!.env.beispiel
 *.key
 *.pem
 secrets*

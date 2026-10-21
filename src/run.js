@@ -8,8 +8,13 @@ import { feedLesen } from './feed-parser.js';
 import { vorfilterErstellen } from './vorfilter.js';
 import { eintraegeAufnehmen, alteLoeschen, oeffentlicheMeldungen } from './sammeln.js';
 import { sichererLink } from './bereinigen.js';
+import { ketteErstellen } from './ki/kette.js';
+import { kiDurchlauf } from './ki/analyse.js';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+// Lokal: Schlüssel aus .env (steht in .gitignore). Online kommen sie aus GitHub Secrets.
+try { process.loadEnvFile(join(WURZEL, '.env')); } catch { /* keine .env – ok */ }
 const ZUSTAND = join(WURZEL, 'data', 'zustand.json');
 const AUSGABE = join(WURZEL, 'public', 'data');
 
@@ -69,6 +74,20 @@ export async function abrufStarten() {
   }
 
   zustand.meldungen = alteLoeschen(zustand.meldungen, einstellungen.aufbewahrungTage, jetzt);
+
+  const kiEinstellungen = await jsonLesen(join(WURZEL, 'config', 'ki.json'), null);
+  const kette = ketteErstellen(kiEinstellungen);
+  let ki = { verfuegbar: kette.verfuegbar, hinweis: 'Kein KI-Schlüssel hinterlegt' };
+  if (kette.verfuegbar.length) {
+    try {
+      const ergebnis = await kiDurchlauf(zustand.meldungen, kette, { kiEinstellungen, relevanzSchwelle: einstellungen.relevanzSchwelle, jetzt });
+      ki = { verfuegbar: kette.verfuegbar, ...ergebnis, protokoll: kette.protokoll };
+    } catch (fehler) {
+      // KI-Probleme dürfen den Abruf nie stoppen – Meldungen erscheinen dann ohne Analyse.
+      ki = { verfuegbar: kette.verfuegbar, fehler: fehler.message, protokoll: kette.protokoll };
+    }
+  }
+
   await jsonSchreiben(ZUSTAND, zustand);
   await jsonSchreiben(join(AUSGABE, 'meldungen.json'), { erstellt: jetzt.toISOString(), meldungen: oeffentlicheMeldungen(zustand.meldungen) });
   await jsonSchreiben(join(AUSGABE, 'status.json'), {
@@ -76,13 +95,19 @@ export async function abrufStarten() {
     letzterAbruf: jetzt.toISOString(),
     relevanzSchwelle: einstellungen.relevanzSchwelle,
     quellen: bericht,
+    ki,
   });
-  return bericht;
+  return { bericht, ki };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const bericht = await abrufStarten();
+  const { bericht, ki } = await abrufStarten();
   const ok = bericht.filter((b) => b.ok).length;
   for (const b of bericht) console.log(`${b.ok ? '✓' : '✗'} ${b.name.padEnd(24)} ${b.ok ? `${b.neu} neu${b.hinweis ? ` (${b.hinweis})` : ''}` : b.fehler}`);
   console.log(`\n${ok} von ${bericht.length} Quellen ok.`);
+  if (!ki.verfuegbar.length) console.log('KI: kein Schlüssel hinterlegt – Meldungen ohne Analyse.');
+  else {
+    console.log(`KI: ${ki.bewertet ?? 0} bewertet, ${ki.analysiert ?? 0} analysiert, ${ki.anfragen ?? 0} Anfragen, ${ki.offen ?? '?'} noch offen${ki.abgebrochen ? ' (alle Dienste am Limit/gestört – wird nachgeholt)' : ''}`);
+    for (const p of ki.protokoll || []) console.log(`   ${p.ok ? '✓' : '✗'} ${p.dienst} / ${p.modell}${p.grund ? ` – ${p.grund}` : ''}`);
+  }
 }

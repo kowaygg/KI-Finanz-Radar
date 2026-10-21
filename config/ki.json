@@ -1,0 +1,38 @@
+{
+  "_anleitung": "KI-Ausweichkette. Reihenfolge = Reihenfolge der Liste. Pro Dienst werden die Modelle der Reihe nach probiert (falls eins abgeschaltet ist). Schlüssel stehen NIE hier, sondern in .env (lokal) bzw. GitHub Secrets – hier steht nur der NAME der Variable. Prüfen, ob die Modelle noch existieren: npm run ki-check",
+  "kette": [
+    {
+      "name": "Gemini",
+      "typ": "gemini",
+      "schluesselVariable": "GEMINI_API_KEY",
+      "adresse": "https://generativelanguage.googleapis.com/v1beta",
+      "modelle": ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"]
+    },
+    {
+      "name": "Groq",
+      "typ": "openai",
+      "schluesselVariable": "GROQ_API_KEY",
+      "adresse": "https://api.groq.com/openai/v1",
+      "modelle": ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+    },
+    {
+      "name": "Mistral",
+      "typ": "openai",
+      "schluesselVariable": "MISTRAL_API_KEY",
+      "adresse": "https://api.mistral.ai/v1",
+      "modelle": ["mistral-small-latest"]
+    },
+    {
+      "name": "OpenRouter",
+      "typ": "openai",
+      "schluesselVariable": "OPENROUTER_API_KEY",
+      "adresse": "https://openrouter.ai/api/v1",
+      "modelle": ["openai/gpt-oss-120b:free", "openrouter/free"]
+    }
+  ],
+  "meldungenProBewertung": 25,
+  "meldungenProAnalyse": 5,
+  "maxBewertungsAnfragenProLauf": 4,
+  "maxAnalyseAnfragenProLauf": 4,
+  "timeoutSekunden": 90
+}
