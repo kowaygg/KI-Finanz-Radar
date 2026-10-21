@@ -265,7 +265,7 @@ VORGEHEN
 ### Offene Punkte
 - Rückfragen: erledigt (21.10.2026)
 - M1 (0.1.0), M2 (0.2.0) und M3 fertig (21.10.2026): online unter https://kowaygg.github.io/KI-Finanz-Radar/ – Abruf alle 15 Min. per GitHub Actions; erster Lauf erfolgreich (10/10 Quellen, Gemini aktiv)
-- Kopfzeile (0.3.0) vorgezogen: Wochentag, Datum, KW, Uhr mit Sekunden, Börsen nach Land gruppiert (Deutschland: Xetra + Börse Frankfurt 8–22 Uhr; USA: NYSE + Nasdaq) mit Countdown + Feiertagen, Wetter Freiburg (Open-Meteo, beim Abruf geholt → status.json), nächster Termin, Zähler neue wichtige Meldungen, Stand; Handy: Rest unter „Mehr anzeigen“. Noch offen: Marktstimmung + Watchlist heute (M4), Design-Umschalter (M7)
+- Kopfzeile (0.3.0) vorgezogen: Wochentag, Datum, KW, Uhr mit Sekunden, Börsen nach Land gruppiert (Deutschland: Xetra + Börse Frankfurt 8–22 Uhr; USA: NYSE + Nasdaq) mit Countdown + Feiertagen, Wetter Freiburg (Open-Meteo, beim Abruf geholt → status.json), nächster Termin, Zähler neue wichtige Meldungen, Stand; Handy: Rest unter „Mehr anzeigen“. Darunter Kasten „Top-News der letzten 24 Stunden“ (warmes Lila #d59bf6, 3 höchste KI-Relevanzen, ohne Dubletten). App lädt alle 5 Min. und beim Zurückkehren neu (Neu-Markierung bleibt pro Sitzung). Noch offen: Marktstimmung + Watchlist heute (M4), Design-Umschalter (M7)
 - Als Nächstes: M4 (Kurse, Watchlist; Marktstimmung in der Kopfzeile)
 - Dependabot hat einen PR für eine Action-Aktualisierung geöffnet → bei der monatlichen Wartung prüfen (nicht ungeprüft übernehmen)
 - Groq-/Mistral-/OpenRouter-Konten noch nicht angelegt (Kette läuft vorerst nur mit Gemini)

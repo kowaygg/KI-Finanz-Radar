@@ -4,6 +4,7 @@ import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wetterS
 const ZEITZONE = 'Europe/Berlin';
 const ALARM_NACH_MS = 3 * 60 * 60 * 1000;
 const SPEICHER_GESEHEN = 'radar.zuletztGesehen';
+const NEU_LADEN_MS = 5 * 60 * 1000;
 
 const $ = (id) => document.getElementById(id);
 
@@ -240,6 +241,25 @@ function kopfAufklappen() {
   $('kopf-mehr').open = window.matchMedia('(min-width: 700px)').matches;
 }
 
+// Die 3 wichtigsten Meldungen der letzten 24 Stunden (höchste KI-Relevanz, bei Gleichstand die neueste).
+function topNewsAnzeigen(meldungen) {
+  const grenze = Date.now() - 24 * 3600 * 1000;
+  const top = meldungen
+    .filter((m) => Number.isInteger(m.ki?.relevanz) && !m.ki.dublette && Date.parse(m.datum) >= grenze)
+    .sort((a, b) => b.ki.relevanz - a.ki.relevanz || Date.parse(b.datum) - Date.parse(a.datum))
+    .slice(0, 3);
+  $('top-news').hidden = top.length === 0;
+  $('top-liste').replaceChildren(...top.map((m) => {
+    const li = element('li', 'top-eintrag');
+    li.append(titelLink(m, anzeigeTitel(m)));
+    const meta = element('div', 'top-meta');
+    meta.append(element('span', 'top-relevanz', `Relevanz ${m.ki.relevanz}/10`), ` · ${zeitText(m.datum)} · ${m.quelle}`);
+    if (STIMMUNG[m.ki.stimmung]) meta.append(' · ', element('span', `stimmung stimmung-${m.ki.stimmung}`, STIMMUNG[m.ki.stimmung]));
+    li.append(meta);
+    return li;
+  }));
+}
+
 function reiterWechseln(ziel) {
   for (const name of ['ticker', 'wichtig']) {
     const aktiv = name === ziel;
@@ -254,8 +274,10 @@ async function jsonHolen(pfad) {
   return antwort.json();
 }
 
+// Stand des letzten Besuchs – bleibt während der Sitzung gleich, damit „neu“-Markierungen beim Nachladen nicht verschwinden.
+const zuletztGesehen = Number(speicherLesen(SPEICHER_GESEHEN)) || 0;
+
 async function laden() {
-  const zuletztGesehen = Number(speicherLesen(SPEICHER_GESEHEN)) || 0;
 
   let status = null;
   let daten = { meldungen: [] };
@@ -270,6 +292,7 @@ async function laden() {
   kopfTicken();
 
   const meldungen = Array.isArray(daten.meldungen) ? daten.meldungen : [];
+  topNewsAnzeigen(meldungen);
   const ticker = $('liste-ticker');
   ticker.replaceChildren(...meldungen.map((m) => meldungElement(m, zuletztGesehen)));
   if (!meldungen.length) ticker.append(element('li', 'leer', 'Noch keine Meldungen geladen.'));
@@ -304,3 +327,6 @@ kopfAufklappen();
 kopfTicken();
 setInterval(kopfTicken, 1000);
 laden();
+// Solange die App offen ist: alle 5 Minuten neue Daten holen, und sofort beim Zurückkehren zur App.
+setInterval(laden, NEU_LADEN_MS);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') laden(); });

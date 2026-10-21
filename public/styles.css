@@ -10,6 +10,9 @@
   --badge-hg: #2b2f37;
   --positiv: #6fd08c;
   --negativ: #ff8a80;
+  --top-akzent: #d59bf6;
+  --top-hg: #2a1f33;
+  --top-rand: #4a3560;
   color-scheme: dark;
 }
 
@@ -134,3 +137,21 @@ body {
 @media (min-width: 700px) {
   .kopf-mehr summary { display: none; }
 }
+
+/* Top-News der letzten 24 Stunden (warmes Lila) */
+.top-news {
+  margin-top: 12px;
+  padding: 10px 14px 12px;
+  border-radius: 10px;
+  background: var(--top-hg);
+  border: 1px solid var(--top-rand);
+  border-left: 5px solid var(--top-akzent);
+}
+.top-news h2 { margin: 0 0 6px; font-size: 0.95rem; color: var(--top-akzent); letter-spacing: 0.02em; }
+.top-news h2::before { content: "★ "; }
+.top-liste { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.top-liste li::marker { color: var(--top-akzent); font-weight: 700; }
+.top-eintrag .titel { margin-top: 0; font-weight: 600; }
+.top-eintrag .titel:hover, .top-eintrag .titel:focus-visible { color: var(--top-akzent); }
+.top-meta { font-size: 0.8rem; color: var(--text-leise); margin-top: 2px; }
+.top-relevanz { color: var(--top-akzent); font-weight: 600; }
