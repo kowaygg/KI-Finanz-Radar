@@ -1,0 +1,17 @@
+# Geheimnisse – niemals ins Repo
+.env
+.env.*
+*.key
+*.pem
+secrets*
+
+# Persönliche Daten – nur lokal (Watchlist: nur Name + ISIN)
+*.local.*
+watchlist*.json
+backup*.json
+
+# Werkzeuge / System
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
