@@ -9,6 +9,8 @@ test('Tagesveränderung aus den letzten zwei Schlusskursen, Lücken fallen weg',
   assert.equal(w.pct, -4);
   assert.deepEqual(w.verlauf, [100, 104, 99.84]);
   assert.equal(wertLesen({ close: [5] }), null);
+  // Nur ein Kurs im Monat (selten gehandelt): Vortag aus chartPreviousClose
+  assert.equal(wertLesen({ close: [293.04], chartPreviousClose: 293.5 }).pct, -0.16);
 });
 
 test('Währung aus dem Börsenkürzel', () => {

@@ -11,6 +11,9 @@ export function waehrungAusSymbol(symbol) {
 // Ein Eintrag der Sammelabfrage → Kurs, Vortag, Veränderung, Monatsverlauf.
 export function wertLesen(eintrag) {
   const kurse = (eintrag?.close || []).filter((k) => Number.isFinite(k) && k > 0);
+  // Selten gehandelte Werte (z. B. manche ETCs) liefern nur einen Kurs – dann zählt der Schlusskurs davor.
+  const davor = Number.isFinite(eintrag?.chartPreviousClose) && eintrag.chartPreviousClose > 0 ? eintrag.chartPreviousClose : null;
+  if (kurse.length === 1 && davor) kurse.unshift(davor);
   if (kurse.length < 2) return null;
   const kurs = kurse[kurse.length - 1];
   const vortag = kurse[kurse.length - 2];

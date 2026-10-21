@@ -48,11 +48,13 @@
   </header>
 
   <nav class="reiter" role="tablist" aria-label="Ansicht">
-    <button role="tab" id="tab-ticker" aria-controls="ansicht-ticker" aria-selected="true">Live-Ticker <span id="zaehler-ticker" class="zaehler" hidden></span></button>
-    <button role="tab" id="tab-wichtig" aria-controls="ansicht-wichtig" aria-selected="false">Wichtig <span id="zaehler-wichtig" class="zaehler" hidden></span></button>
+    <div class="reiter-gruppe" role="presentation">
+      <button role="tab" id="tab-ticker" aria-controls="ansicht-ticker" aria-selected="true" title="Live-Ticker: alle neuen Meldungen">Live <span id="zaehler-ticker" class="zaehler" hidden></span></button>
+      <button role="tab" id="tab-wichtig" aria-controls="ansicht-wichtig" aria-selected="false" title="Von der KI als wichtig bewertet">Wichtig <span id="zaehler-wichtig" class="zaehler" hidden></span></button>
+    </div>
     <button role="tab" id="tab-watchlist" aria-controls="ansicht-watchlist" aria-selected="false">Watchlist <span id="zaehler-watchlist" class="zaehler warn" hidden></span></button>
     <button role="tab" id="tab-kurse" aria-controls="ansicht-kurse" aria-selected="false">Kurse</button>
-    <button role="tab" id="tab-boersen" aria-controls="ansicht-boersen" aria-selected="false">Börsen <span id="zaehler-boersen" class="zaehler" hidden></span></button>
+    <button role="tab" id="tab-boersen" aria-controls="ansicht-boersen" aria-selected="false">Börsen</button>
   </nav>
 
   <main>

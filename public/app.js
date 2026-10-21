@@ -235,8 +235,6 @@ function boersenAnzeigen(jetzt) {
     }
     return gruppe;
   }));
-  $('zaehler-boersen').hidden = offen === 0;
-  $('zaehler-boersen').textContent = `${offen} offen`;
   $('boersen-hinweis').textContent = kalender.boersenHinweis
     ? `Zeiten in deutscher Zeit, Countdown live. ${kalender.boersenHinweis}` : 'Zeiten in deutscher Zeit, Countdown live.';
 }

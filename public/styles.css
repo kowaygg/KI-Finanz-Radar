@@ -224,3 +224,8 @@ body {
   .reiter button { padding: 10px 5px; font-size: 0.86rem; }
   .reiter .zaehler { font-size: 0.7rem; padding: 0 4px; min-width: 1.2em; }
 }
+
+/* Live + Wichtig gehören zusammen: gemeinsamer Rahmen, trotzdem zwei Knöpfe */
+.reiter { align-items: flex-end; }
+.reiter-gruppe { display: flex; border: 1px solid #5a5f6a; border-bottom: 0; border-radius: 8px 8px 0 0; padding: 0 2px; flex: 0 0 auto; }
+.reiter-gruppe button + button { border-left: 1px solid #5a5f6a; }
