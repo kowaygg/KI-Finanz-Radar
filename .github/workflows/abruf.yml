@@ -77,9 +77,16 @@ jobs:
       # Fehler hier stoppen nie den Abruf – die App liest dann mit der Gerätestimme vor.
       - name: Ansagen für „Lies mir vor“ erzeugen
         continue-on-error: true
+        timeout-minutes: 6
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null)
-          PIPER_BIN="$HOME/piper/piper/piper" PIPER_MODELL="$HOME/piper/thorsten.onnx" node scripts/vorlesen-audio.js
+          if ! command -v ffmpeg >/dev/null; then
+            echo "ffmpeg fehlt – wird installiert"
+            timeout 150 sudo -E apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null || echo "ffmpeg nicht installiert – Ansagen als WAV"
+          fi
+          ls -la "$HOME/piper" "$HOME/piper/piper" | head -20
+          PIPER_BIN="$HOME/piper/piper/piper" PIPER_MODELL="$HOME/piper/thorsten.onnx" timeout 300 node scripts/vorlesen-audio.js
 
       - name: Arbeitsstand sichern
         if: always()

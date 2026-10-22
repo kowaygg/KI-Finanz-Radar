@@ -5,6 +5,6 @@
   "tiefe": 0.88,
   "tempo": 1.0,
   "bitrate": "40k",
-  "maxNeuProLauf": 40,
+  "maxNeuProLauf": 15,
   "aufbewahrungTage": 3
 }

@@ -17,9 +17,10 @@ const AUSGABE = join(WURZEL, 'public', 'data', 'audio');
 const stimme = JSON.parse(await readFile(join(WURZEL, 'config', 'stimme.json'), 'utf8'));
 const { PIPER_BIN, PIPER_MODELL } = process.env;
 
-function ausfuehren(programm, argumente, eingabe) {
+// Jeder Aufruf hat eine Zeitgrenze – ein hängendes Programm darf den Abruf nie aufhalten.
+function ausfuehren(programm, argumente, eingabe, zeitgrenzeMs = 60000) {
   return new Promise((fertig, fehler) => {
-    const p = spawn(programm, argumente, { stdio: ['pipe', 'ignore', 'pipe'] });
+    const p = spawn(programm, argumente, { stdio: ['pipe', 'ignore', 'pipe'], timeout: zeitgrenzeMs, killSignal: 'SIGKILL' });
     let meldung = '';
     p.stderr.on('data', (d) => { meldung += d; });
     p.on('error', fehler);
@@ -57,6 +58,7 @@ if (!PIPER_BIN || !PIPER_MODELL || !(await vorhanden(PIPER_BIN))) {
 const { meldungen = [] } = JSON.parse(await readFile(join(WURZEL, 'public', 'data', 'meldungen.json'), 'utf8'));
 const { relevanzSchwelle = 7 } = JSON.parse(await readFile(join(WURZEL, 'public', 'data', 'status.json'), 'utf8'));
 const mitFfmpeg = await ffmpegDa();
+console.log(`Vorlese-Stimme: ${mitFfmpeg ? 'ffmpeg vorhanden (MP3)' : 'ohne ffmpeg (WAV)'}`);
 const endung = mitFfmpeg ? 'mp3' : 'wav';
 await mkdir(CACHE, { recursive: true });
 await mkdir(AUSGABE, { recursive: true });
@@ -71,8 +73,10 @@ for (const m of wichtigeMeldungen(meldungen, relevanzSchwelle)) {
   if (!(await vorhanden(imCache))) {
     if (neu >= stimme.maxNeuProLauf) continue; // Rest beim nächsten Abruf
     try {
+      const start = Date.now();
       await ansageErzeugen(text, imCache, mitFfmpeg);
       neu++;
+      console.log(`  Ansage ${neu} erzeugt (${m.id}, ${((Date.now() - start) / 1000).toFixed(1)} s)`);
     } catch (e) {
       fehler++;
       console.log(`Vorlese-Stimme: Fehler bei ${m.id}: ${e.message}`);
