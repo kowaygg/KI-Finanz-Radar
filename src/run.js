@@ -13,6 +13,7 @@ import { kiDurchlauf } from './ki/analyse.js';
 import { kurseHolen } from './kurse.js';
 import { werteHolen, verlaeufeHolen, verlaufDatei } from './werte.js';
 import { leitzinsenHolen } from './zinsen.js';
+import { wichtigesPushen } from './push.js';
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -92,6 +93,12 @@ export async function abrufStarten() {
     }
   }
 
+  // Push (ntfy): neue Meldungen mit Relevanz 9–10 – höchstens ein paar pro Lauf, nie doppelt.
+  const sichtFilter = { mindestRelevanz: einstellungen.liveMindestRelevanz ?? 3, meinungAb: einstellungen.meinungMindestRelevanz ?? 5 };
+  const pushEinstellungen = await jsonLesen(join(WURZEL, 'config', 'push.json'), null);
+  const push = pushEinstellungen
+    ? await wichtigesPushen(zustand.meldungen, pushEinstellungen, { kanal: process.env[pushEinstellungen.kanalVariable], jetzt, filter: sichtFilter })
+    : { aktiv: false };
 
   // Kurse: letzter Stand liegt (wie der Zustand) im Cache-Ordner data/ und dient als Rückfall.
   const kursEinstellungen = await jsonLesen(join(WURZEL, 'config', 'kurse.json'), null);
@@ -142,19 +149,20 @@ export async function abrufStarten() {
   });
 
   await jsonSchreiben(ZUSTAND, zustand);
-  await jsonSchreiben(join(AUSGABE, 'meldungen.json'), { erstellt: jetzt.toISOString(), meldungen: oeffentlicheMeldungen(zustand.meldungen, { mindestRelevanz: einstellungen.liveMindestRelevanz ?? 3, meinungAb: einstellungen.meinungMindestRelevanz ?? 5 }) });
+  await jsonSchreiben(join(AUSGABE, 'meldungen.json'), { erstellt: jetzt.toISOString(), meldungen: oeffentlicheMeldungen(zustand.meldungen, sichtFilter) });
   await jsonSchreiben(join(AUSGABE, 'status.json'), {
     version,
     letzterAbruf: jetzt.toISOString(),
     relevanzSchwelle: einstellungen.relevanzSchwelle,
     quellen: bericht,
     ki,
+    push,
   });
-  return { bericht, ki };
+  return { bericht, ki, push };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const { bericht, ki } = await abrufStarten();
+  const { bericht, ki, push } = await abrufStarten();
   const ok = bericht.filter((b) => b.ok).length;
   for (const b of bericht) console.log(`${b.ok ? '✓' : '✗'} ${b.name.padEnd(24)} ${b.ok ? `${b.neu} neu${b.hinweis ? ` (${b.hinweis})` : ''}` : b.fehler}`);
   console.log(`\n${ok} von ${bericht.length} Quellen ok.`);
@@ -163,4 +171,5 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     console.log(`KI: ${ki.bewertet ?? 0} bewertet, ${ki.analysiert ?? 0} analysiert, ${ki.anfragen ?? 0} Anfragen, ${ki.offen ?? '?'} noch offen${ki.abgebrochen ? ' (alle Dienste am Limit/gestört – wird nachgeholt)' : ''}`);
     for (const p of ki.protokoll || []) console.log(`   ${p.ok ? '✓' : '✗'} ${p.dienst} / ${p.modell}${p.grund ? ` – ${p.grund}` : ''}`);
   }
+  console.log(push.aktiv ? `Push: ${push.gesendet} von ${push.kandidaten} gesendet` : `Push: kein Kanal (NTFY_KANAL) – ${push.kandidaten ?? 0} wären gesendet worden`);
 }

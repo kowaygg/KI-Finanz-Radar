@@ -1,0 +1,42 @@
+# Wöchentlicher Selbstcheck (sonntags): prüft Quellen, Kurse, alle KI-Dienste, Kontingent, Sicherheit, Abruf und Repo-Größe,
+# schreibt einen Ampel-Bericht (Zusammenfassung des Laufs) und schickt ihn per ntfy aufs Handy.
+# Prüft und berichtet nur – ändert nie Code. Hält außerdem die geplanten Abläufe aktiv (60-Tage-Regel von GitHub).
+name: Selbstcheck
+
+on:
+  schedule:
+    - cron: "23 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  selbstcheck:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: write # nur zum Einschalten der geplanten Abläufe (gegen die 60-Tage-Abschaltung)
+      pull-requests: read
+      security-events: read
+    steps:
+      - name: Code holen
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.22.0"
+
+      - name: Selbstcheck
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          NTFY_KANAL: ${{ secrets.NTFY_KANAL }}
+        run: node scripts/selbstcheck.js

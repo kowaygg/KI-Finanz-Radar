@@ -1,0 +1,11 @@
+{
+  "_anleitung": "Push-Nachrichten über ntfy (kostenlos, ohne Konto). Der Kanalname ist geheim und steht NIE hier, sondern in .env (lokal) bzw. im GitHub Secret NTFY_KANAL – hier steht nur der Name der Variable. Gesendet werden nur öffentliche News-Inhalte.",
+  "server": "https://ntfy.sh",
+  "kanalVariable": "NTFY_KANAL",
+  "appAdresse": "https://kowaygg.github.io/KI-Finanz-Radar/",
+  "statusAdresse": "https://kowaygg.github.io/KI-Finanz-Radar/data/status.json",
+  "minRelevanz": 9,
+  "maxAlterStunden": 6,
+  "maxProLauf": 3,
+  "abrufWarnungStunden": 3
+}

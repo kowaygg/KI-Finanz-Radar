@@ -49,6 +49,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          NTFY_KANAL: ${{ secrets.NTFY_KANAL }}
         run: npm run abruf
 
       - name: Arbeitsstand sichern
