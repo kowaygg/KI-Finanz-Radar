@@ -2,7 +2,7 @@
 // (Der Hinweis „Neue Version verfügbar“ kommt mit Meilenstein 7.)
 const VERSION = '0.10.0';
 const SPEICHER = `radar-${VERSION}`;
-const GRUNDGERUEST = ['./', 'index.html', 'styles.css', 'app.js', 'zeit.js', 'diagramm.js', 'watchlist.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
+const GRUNDGERUEST = ['./', 'index.html', 'styles.css', 'app.js', 'zeit.js', 'diagramm.js', 'watchlist.js', 'vorlesetext.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SPEICHER).then((c) => c.addAll(GRUNDGERUEST)));
@@ -17,6 +17,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Ansagen (Audio) direkt laden: nicht zwischenspeichern, damit Vor-/Zurückspulen überall klappt.
+  if (url.pathname.includes('/data/audio/')) return;
 
   e.respondWith(
     fetch(e.request)

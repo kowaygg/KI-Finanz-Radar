@@ -52,6 +52,35 @@ jobs:
           NTFY_KANAL: ${{ secrets.NTFY_KANAL }}
         run: npm run abruf
 
+      # Vorlese-Stimme „Thorsten“ (Piper, frei): Programm + Stimme einmal laden (mit Prüfsumme), danach aus dem Cache.
+      - name: Vorlese-Stimme aus dem Cache holen
+        id: piper
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/piper
+          key: piper-2023.11.14-2-thorsten-medium-v1.0.0
+
+      - name: Vorlese-Stimme herunterladen (nur beim ersten Mal)
+        if: steps.piper.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/piper && cd ~/piper
+          curl -fsSL -o piper.tar.gz https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
+          curl -fsSL -o thorsten.onnx https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx
+          curl -fsSL -o thorsten.onnx.json https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx.json
+          sha256sum -c - <<'PRUEFSUMMEN'
+          a50cb45f355b7af1f6d758c1b360717877ba0a398cc8cbe6d2a7a3a26e225992  piper.tar.gz
+          7e64762d8e5118bb578f2eea6207e1a35a8e0c30595010b666f983fc87bb7819  thorsten.onnx
+          974adee790533adb273a1ac88f49027d2a1b8f0f2cf4905954a4791e79264e85  thorsten.onnx.json
+          PRUEFSUMMEN
+          tar xzf piper.tar.gz && rm piper.tar.gz
+
+      # Fehler hier stoppen nie den Abruf – die App liest dann mit der Gerätestimme vor.
+      - name: Ansagen für „Lies mir vor“ erzeugen
+        continue-on-error: true
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null)
+          PIPER_BIN="$HOME/piper/piper/piper" PIPER_MODELL="$HOME/piper/thorsten.onnx" node scripts/vorlesen-audio.js
+
       - name: Arbeitsstand sichern
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

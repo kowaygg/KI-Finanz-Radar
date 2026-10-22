@@ -1,0 +1,10 @@
+{
+  "_anleitung": "Vorlese-Stimme für „Lies mir vor“: freie Stimme „Thorsten“ (Piper, gemeinfrei/CC0). Wird beim Abruf in GitHub Actions als Audio erzeugt. Programm und Stimme lädt der Abruf-Ablauf mit Prüfsumme herunter (Adressen in .github/workflows/abruf.yml). tiefe < 1 = dunkler (z. B. 0.88), tempo < 1 = langsamer.",
+  "name": "Thorsten",
+  "version": "thorsten-medium-1",
+  "tiefe": 0.88,
+  "tempo": 1.0,
+  "bitrate": "40k",
+  "maxNeuProLauf": 40,
+  "aufbewahrungTage": 3
+}

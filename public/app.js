@@ -2,6 +2,7 @@
 import { kalenderwoche, boersenStatus, countdown, kurzerTag, terminText, wandzeit } from './zeit.js';
 import { veraenderung, kurveZeichnen, kursText, zeitBeschriftung, spanneText } from './diagramm.js';
 import { watchlistLesen, suchbegriffe, meldungTrifft } from './watchlist.js';
+import { vorleseSaetze } from './vorlesetext.js';
 
 const ZEITZONE = 'Europe/Berlin';
 const ALARM_NACH_MS = 3 * 60 * 60 * 1000;
@@ -702,6 +703,9 @@ async function laden() {
   try { maerkteAnzeigen(await jsonHolen('data/kurse.json')); } catch { /* ohne Diagramme weiter */ }
   try { zinsDaten = await jsonHolen('data/zinsen.json'); } catch { /* ohne Zinsen weiter */ }
   try { werteDaten = await jsonHolen('data/werte.json'); } catch { /* ohne Kurse für die Watchlist weiter */ }
+  try { audioDaten = await jsonHolen('data/audio.json'); } catch { /* ohne Thorsten – Gerätestimme */ }
+  if (!audioDaten?.dateien) audioDaten = { stimme: '', dateien: {} };
+  if (!vorlesen.aktiv) stimmenListeAnzeigen();
   watchlistBegriffeBerechnen();
 
   if (status?.version) $('version').textContent = `Version ${status.version}`;
@@ -753,12 +757,17 @@ zinsenEinrichten();
 watchlistBearbeitenEinrichten();
 
 // ---------- „Lies mir vor“ (Reiter Wichtig) ----------
-// Kostenlos über die Sprachausgabe des Geräts (Web Speech API). Liest jede Meldung von oben nach unten:
-// Überschrift, dann die Stichpunkte, dann die nächste. Jeder Satz ist eine eigene kurze Ansage –
+// Liest jede Meldung von oben nach unten: Überschrift, dann die Stichpunkte, dann die nächste.
+// 1. Wahl: freie Stimme „Thorsten“ – beim Abruf als Audio erzeugt (data/audio.json), klingt auf allen Geräten gleich.
+// Ersatz: Sprachausgabe des Geräts (Web Speech API). Jeder Satz ist dort eine eigene kurze Ansage –
 // so bricht Chrome am PC lange Texte nicht ab, und Pause/Weiter klappt auch auf Android zuverlässig.
 let vorlesenListe = [];
 const vorlesen = { aktiv: false, pausiert: false, meldung: 0, satz: 0, lauf: 0, sperre: null };
 const sprachausgabe = 'speechSynthesis' in window ? window.speechSynthesis : null;
+const THORSTEN = 'thorsten';
+let audioDaten = { stimme: '', dateien: {} };
+const player = new Audio();
+player.preload = 'auto';
 
 // Stimme, Tonhöhe und Tempo wählt jeder auf seinem Gerät selbst (gespeichert nur lokal).
 // Voreinstellung: eine männliche deutsche Stimme, etwas tiefer gestellt.
@@ -766,6 +775,11 @@ const SPEICHER_STIMME = 'radar.stimme';
 const MAENNLICH = /stefan|conrad|killian|florian|kasper|ralf|bernd|christoph|jonas|markus|yannick|thorsten|männlich|maennlich|male|mann/i;
 const stimmEinstellung = { name: '', tonhoehe: 0.8, tempo: 0.95 };
 try { Object.assign(stimmEinstellung, JSON.parse(speicherLesen(SPEICHER_STIMME) || '{}')); } catch { /* Standard */ }
+
+// Thorsten ist Standard, sobald Ansagen vorhanden sind – außer jemand wählt eine Gerätestimme.
+function thorstenAktiv() {
+  return Object.keys(audioDaten.dateien).length > 0 && (!stimmEinstellung.name || stimmEinstellung.name === THORSTEN);
+}
 
 function deutscheStimmen() {
   return (sprachausgabe?.getVoices() || []).filter((s) => /^de([-_]|$)/i.test(s.lang));
@@ -783,14 +797,22 @@ function stimmenListeAnzeigen() {
   const auswahl = $('stimme-wahl');
   const stimmen = deutscheStimmen();
   const aktiv = deutscheStimme();
-  auswahl.replaceChildren(...stimmen.map((s) => {
+  const thorsten = Object.keys(audioDaten.dateien).length > 0;
+  const optionen = stimmen.map((s) => {
     const o = element('option', null, `${s.name}${MAENNLICH.test(s.name) ? ' (männlich)' : ''}`);
     o.value = s.name;
-    o.selected = s === aktiv;
+    o.selected = !thorstenAktiv() && s === aktiv;
     return o;
-  }));
-  if (!stimmen.length) auswahl.append(element('option', null, 'Gerätestimme (keine Auswahl möglich)'));
-  $('stimme-hinweis').hidden = stimmen.length > 1;
+  });
+  if (thorsten) {
+    const o = element('option', null, 'Thorsten – dunkel (empfohlen, gleiche Stimme auf allen Geräten)');
+    o.value = THORSTEN;
+    o.selected = thorstenAktiv();
+    optionen.unshift(o);
+  }
+  auswahl.replaceChildren(...optionen);
+  if (!optionen.length) auswahl.append(element('option', null, 'Gerätestimme (keine Auswahl möglich)'));
+  $('stimme-hinweis').hidden = thorsten || stimmen.length > 1;
 }
 
 function stimmeSpeichern() {
@@ -811,11 +833,25 @@ function ansageErstellen(text) {
 }
 
 function saetzeVon(m, nummer, anzahl) {
-  const { punkte, wenigInfo } = stichpunkte(m);
-  const saetze = [`Meldung ${nummer} von ${anzahl}. ${anzeigeTitel(m)}.`];
-  saetze.push(...(punkte.length ? punkte : ['Dazu gibt es noch keine Zusammenfassung.']));
-  if (wenigInfo) saetze.push('Kurzmeldung, die Quelle enthält nur wenige Infos.');
-  return saetze;
+  return [`Meldung ${nummer} von ${anzahl}.`, ...vorleseSaetze(m)];
+}
+
+// Thorsten-Ansage einer ganzen Meldung abspielen; klappt das nicht, liest die Gerätestimme.
+function ansageAbspielen(m) {
+  const lauf = vorlesen.lauf;
+  vorlesen.modus = 'audio';
+  player.src = audioDaten.dateien[m.id];
+  player.playbackRate = stimmEinstellung.tempo / 0.95;
+  player.onended = () => { if (lauf === vorlesen.lauf) { vorlesen.meldung++; vorlesen.satz = 0; naechsterSatz(); } };
+  player.onerror = () => { if (lauf === vorlesen.lauf) geraetestimmeStatt(m); };
+  player.play().catch((e) => { if (lauf === vorlesen.lauf && e.name !== 'AbortError') geraetestimmeStatt(m); });
+}
+
+function geraetestimmeStatt(m) {
+  if (!sprachausgabe) { vorlesen.meldung++; naechsterSatz(); return; }
+  vorlesen.modus = 'sprache';
+  vorlesen.ohneAudio = m.id;
+  naechsterSatz();
 }
 
 function vorlesenMarkieren() {
@@ -853,11 +889,13 @@ function naechsterSatz() {
     naechsterSatz();
     return;
   }
-  if (vorlesen.satz === 0) {
+  if (vorlesen.satz === 0 && vorlesen.ohneAudio !== m.id) {
     vorlesenMarkieren();
     meldungOeffnen(m.id);
     vorlesenAnzeigen();
+    if (thorstenAktiv() && audioDaten.dateien[m.id]) { ansageAbspielen(m); return; }
   }
+  vorlesen.modus = 'sprache';
   const ansage = ansageErstellen(saetze[vorlesen.satz]);
   const lauf = vorlesen.lauf;
   // Abgebrochene Ansagen (Pause/Stopp) melden sich auch mit „end“/„error“ – die alte Runde wird ignoriert.
@@ -870,11 +908,11 @@ function naechsterSatz() {
 }
 
 function vorlesenStarten() {
-  if (!sprachausgabe || !vorlesenListe.length) return;
-  sprachausgabe.cancel();
-  Object.assign(vorlesen, { aktiv: true, pausiert: false, meldung: 0, satz: 0, lauf: vorlesen.lauf + 1 });
+  if (!vorlesenListe.length || (!sprachausgabe && !thorstenAktiv())) return;
+  sprachausgabe?.cancel();
+  Object.assign(vorlesen, { aktiv: true, pausiert: false, meldung: 0, satz: 0, lauf: vorlesen.lauf + 1, ohneAudio: null });
   bildschirmWachHalten(true);
-  if (!deutscheStimme()) kurzerHinweis('Keine deutsche Stimme gefunden – es liest die Standardstimme. Windows 10: Einstellungen → Zeit und Sprache → Sprache → Deutsch → Optionen → Sprachausgabe.');
+  if (!thorstenAktiv() && !deutscheStimme()) kurzerHinweis('Keine deutsche Stimme gefunden – es liest die Standardstimme. Windows 10: Einstellungen → Zeit und Sprache → Sprache → Deutsch → Optionen → Sprachausgabe.');
   naechsterSatz();
 }
 
@@ -882,6 +920,12 @@ function vorlesenStarten() {
 function vorlesenPause() {
   if (!vorlesen.aktiv) return;
   vorlesen.pausiert = !vorlesen.pausiert;
+  if (vorlesen.modus === 'audio') {
+    // Thorsten-Ansage: einfach anhalten bzw. an derselben Stelle weiterspielen.
+    if (vorlesen.pausiert) player.pause(); else player.play().catch(() => {});
+    vorlesenAnzeigen();
+    return;
+  }
   vorlesen.lauf++;
   sprachausgabe.cancel();
   vorlesenAnzeigen();
@@ -891,28 +935,34 @@ function vorlesenPause() {
 function vorlesenStoppen(text = '') {
   Object.assign(vorlesen, { aktiv: false, pausiert: false, lauf: vorlesen.lauf + 1 });
   sprachausgabe?.cancel();
+  player.pause();
+  player.removeAttribute('src');
   bildschirmWachHalten(false);
   vorlesenMarkieren();
   vorlesenAnzeigen(text);
 }
 
 function vorlesenEinrichten() {
-  if (!sprachausgabe) {
-    $('vorlesen-start').disabled = true;
-    $('vorlesen-status').textContent = 'Dieser Browser kann nicht vorlesen.';
-    return;
-  }
   // Chrome lädt die Stimmen erst nach und nach – Liste bei jeder Änderung neu aufbauen.
   stimmenListeAnzeigen();
-  sprachausgabe.addEventListener?.('voiceschanged', stimmenListeAnzeigen);
+  sprachausgabe?.addEventListener?.('voiceschanged', stimmenListeAnzeigen);
   $('stimme-tonhoehe').value = String(stimmEinstellung.tonhoehe);
   $('stimme-tempo').value = String(stimmEinstellung.tempo);
   for (const id of ['stimme-wahl', 'stimme-tonhoehe', 'stimme-tempo']) $(id).addEventListener('change', stimmeSpeichern);
   $('stimme-probe').addEventListener('click', () => {
     stimmeSpeichern();
     if (vorlesen.aktiv) vorlesenStoppen();
-    sprachausgabe.cancel();
-    sprachausgabe.speak(ansageErstellen('Guten Abend. Hier sind die wichtigsten Meldungen aus Wirtschaft und Börse.'));
+    sprachausgabe?.cancel();
+    if (thorstenAktiv()) {
+      // Probe: Anfang der ersten Thorsten-Ansage
+      player.src = Object.values(audioDaten.dateien)[0];
+      player.playbackRate = stimmEinstellung.tempo / 0.95;
+      player.onended = null;
+      player.play().catch(() => {});
+      setTimeout(() => { if (!vorlesen.aktiv) player.pause(); }, 7000);
+      return;
+    }
+    sprachausgabe?.speak(ansageErstellen('Guten Abend. Hier sind die wichtigsten Meldungen aus Wirtschaft und Börse.'));
   });
   $('vorlesen-start').addEventListener('click', vorlesenStarten);
   $('vorlesen-pause').addEventListener('click', vorlesenPause);
