@@ -313,7 +313,8 @@ main { padding-bottom: 8px; }
 #ansicht-wichtig .top-news { margin: 0 0 12px; }
 
 /* „Lies mir vor“ – nur im Reiter Wichtig */
-.vorlesen-leiste { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; }
+.vorlesen-leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin: 0 0 12px; }
+.vorlesen-leiste #vorlesen-status { order: -1; margin-right: auto; }
 .vorlesen-leiste .knopf { display: inline-flex; align-items: center; gap: 6px; }
 .vorlesen-leiste .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .meldung { scroll-margin-top: 12px; }

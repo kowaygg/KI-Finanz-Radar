@@ -33,7 +33,7 @@ AUFGABE: Bewerte jede Meldung.
   unterhaltung = Lifestyle, Kurioses, Geschichten ohne Marktbezug, Gesundheit, Reisen, Sport, Promis
 - passt: true nur, wenn es um Wirtschaft, Börse, Unternehmen, KI/Tech-Branche, Zentralbanken, Konjunktur, Politik mit klarer Marktwirkung oder Finanzen & Vorsorge geht
   (Finanzen & Vorsorge = Banken, Broker, Finanzaufsicht, Steuern auf Kapitalerträge, Rente/Altersvorsorge, staatliche Förderung wie Altersvorsorgedepot oder Frühstart-Rente, neue Finanzgesetze); sonst false
-- kurz: NUR wenn passt=true, clickbait=false und relevanz ≥ 3 – sonst leere Liste []. Bis zu 5 kurze Stichpunkte auf Deutsch (je höchstens 20 Wörter): das Wichtigste, was ein Anleger zu dieser Meldung wissen sollte (Was ist passiert? Wer? Zahlen? Warum wichtig?).
+- kurz: NUR wenn passt=true, clickbait=false und relevanz ≥ 3 – sonst leere Liste []. Normalerweise 3 kurze Stichpunkte auf Deutsch, bis zu 5 nur wenn der Text so viel Wichtiges hergibt (je höchstens 20 Wörter): das Wichtigste, was ein Anleger zu dieser Meldung wissen sollte (Was ist passiert? Wer? Zahlen? Warum wichtig?).
   Verwende AUSSCHLIESSLICH Fakten aus "titel" und "auszug". Nichts ergänzen, nichts aus eigenem Wissen, keine Vermutungen. Wiederhole nicht einfach die Überschrift.
   Gibt der Auszug weniger her, schreibe weniger Punkte (mindestens 1) und setze wenigInfo: true.
 - wenigInfo: true, wenn Titel und Auszug für 3 oder mehr inhaltliche Stichpunkte nicht reichen; sonst false
@@ -49,7 +49,7 @@ export const ANALYSIEREN = `${GRUNDREGELN}
 
 AUFGABE: Analysiere jede wichtige Meldung ausführlich.
 - titel: deutsche Überschrift (übersetzen, falls englisch; sachlich, ohne Übertreibung)
-- zusammenfassung: 5 kurze Stichpunkte auf Deutsch (das Wichtigste, was ein Anleger wissen sollte) – nur was in der Meldung steht; gibt sie weniger her, dann weniger (mindestens 2)
+- zusammenfassung: normalerweise 3 kurze Stichpunkte auf Deutsch (das Wichtigste, was ein Anleger wissen sollte), bis zu 5 nur wenn sinnvoll – nur was in der Meldung steht; gibt sie weniger her, dann weniger (mindestens 2)
 - betroffen: {"aktien":[…],"etfs":[…],"branchen":[…]} – konkrete Namen, nur wenn plausibel betroffen; sonst leere Liste. ETFs als Art/Index (z. B. "MSCI World", "Halbleiter-ETFs")
 - einschaetzung: {"text":"2–4 Sätze zu möglichen Auswirkungen auf Märkte, Branchen, Aktien","zeithorizont":eine aus ${JSON.stringify(ZEITHORIZONTE)},"sicherheit":eine aus ${JSON.stringify(SICHERHEITEN)}}
 - vergleich: historischer Vergleich NUR wenn gut belegt und allgemein bekannt, sonst null. Lieber weglassen als raten.
