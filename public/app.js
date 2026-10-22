@@ -54,20 +54,6 @@ function titelLink(m, text) {
   return el;
 }
 
-function originalZeile(m) {
-  if (m.sprache !== 'en' || anzeigeTitel(m) === m.titel) return null;
-  const zeile = element('div', 'original', `Original: ${m.titel} · `);
-  const link = sichererLink(m.link);
-  if (link) {
-    const a = element('a', null, 'Originalseite (Englisch)');
-    a.href = link;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    zeile.append(a);
-  }
-  return zeile;
-}
-
 function zeitText(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
@@ -81,31 +67,84 @@ function element(tag, klasse, text) {
   return el;
 }
 
-function meldungElement(m, zuletztGesehen) {
-  const li = element('li', 'meldung');
-  if (zuletztGesehen && Date.parse(m.gefunden) > zuletztGesehen) li.classList.add('neu');
+// ---------- Aufklappbare Meldungen (Live und Wichtig) ----------
+// Ein Klick auf die Meldung öffnet zuerst die KI-Zusammenfassung; erst der Link darunter führt zur Quelle.
 
-  const meta = element('div', 'meta');
-  const zeit = element('time', 'zeit', zeitText(m.datum));
-  zeit.dateTime = m.datum;
-  meta.append(zeit, element('span', null, m.quelle), element('span', 'badge', m.kategorie));
-  watchlistBadge(meta, m);
-  li.append(meta);
-  li.append(titelLink(m, anzeigeTitel(m)));
+// Stichpunkte einer Meldung: ausführliche Analyse (Wichtig) vor Kurz-Zusammenfassung aus der Bewertung.
+function stichpunkte(m) {
+  const analyse = m.ki?.analyse?.zusammenfassung;
+  if (Array.isArray(analyse) && analyse.length) return { punkte: analyse, wenigInfo: analyse.length < 3 };
+  if (Array.isArray(m.ki?.kurz) && m.ki.kurz.length) return { punkte: m.ki.kurz, wenigInfo: Boolean(m.ki.wenigInfo) };
+  return { punkte: [], wenigInfo: false };
+}
 
+function linkElement(href, text) {
+  const a = element('a', null, text);
+  a.href = href;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  return a;
+}
+
+function zusammenfassungElement(m) {
+  const { punkte, wenigInfo } = stichpunkte(m);
+  if (!punkte.length) {
+    return [element('p', 'hinweis', m.ki
+      ? 'Für diese Meldung gibt es keine Zusammenfassung (ältere Meldung oder zu wenig Text in der Quelle).'
+      : 'Zusammenfassung folgt beim nächsten Abruf – die KI hat diese Meldung noch nicht gelesen.')];
+  }
+  const ul = element('ul', 'punkte');
+  for (const p of punkte) ul.append(element('li', null, p));
+  return wenigInfo ? [ul, element('p', 'kurzmeldung', 'Kurzmeldung – nur wenige Infos in der Quelle. Mehr steht im Originalartikel.')] : [ul];
+}
+
+function quellenElement(m) {
+  const box = element('div', 'quelle-zeile');
+  box.append(element('span', 'leise', `Quelle: ${m.quelle} · `));
+  const link = leseLink(m);
+  if (link) box.append(linkElement(link, m.sprache === 'en' ? 'Artikel auf Deutsch öffnen ↗' : 'Artikel öffnen ↗'));
+  const original = sichererLink(m.link);
+  if (m.sprache === 'en' && original) box.append(' · ', linkElement(original, 'Originalseite (Englisch)'));
   const weitere = (m.quellen || []).filter((q) => q.name !== m.quelle && sichererLink(q.link));
   if (weitere.length) {
     const zeile = element('div', 'weitere', 'Auch bei: ');
     weitere.forEach((q, i) => {
-      const a = element('a', null, q.name);
-      a.href = sichererLink(q.link);
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      zeile.append(a);
+      zeile.append(linkElement(sichererLink(q.link), q.name));
       if (i < weitere.length - 1) zeile.append(', ');
     });
-    li.append(zeile);
+    box.append(zeile);
   }
+  return box;
+}
+
+function zeitElement(m) {
+  const zeit = element('time', 'zeit', zeitText(m.datum));
+  zeit.dateTime = m.datum;
+  return zeit;
+}
+
+function aufklappMeldung(m, klasse, metaTeile, inhalt) {
+  const li = element('li', klasse);
+  li.id = `meldung-${m.id}`;
+  const details = element('details', 'aufklapp');
+  const summary = element('summary');
+  const meta = element('div', 'meta');
+  meta.append(...metaTeile);
+  watchlistBadge(meta, m);
+  const kopf = element('div', 'aufklapp-kopf');
+  kopf.append(element('span', 'titel', anzeigeTitel(m)), element('span', 'pfeil', '▸'));
+  summary.append(meta, kopf);
+  if (m.sprache === 'en' && anzeigeTitel(m) !== m.titel) summary.append(element('div', 'original', `Original: ${m.titel}`));
+  const koerper = element('div', 'aufklapp-inhalt');
+  koerper.append(...inhalt, quellenElement(m));
+  details.append(summary, koerper);
+  li.append(details);
+  return li;
+}
+
+function meldungElement(m, zuletztGesehen) {
+  const li = aufklappMeldung(m, 'meldung', [zeitElement(m), element('span', null, m.quelle), element('span', 'badge', m.kategorie)], zusammenfassungElement(m));
+  if (zuletztGesehen && Date.parse(m.gefunden) > zuletztGesehen) li.classList.add('neu');
   return li;
 }
 
@@ -119,56 +158,44 @@ function chips(titel, werte) {
   return zeile;
 }
 
-// Ausführliche Darstellung im Reiter „Wichtig“.
+// Ausführliche Darstellung im Reiter „Wichtig“ – ebenfalls aufklappbar.
 function wichtigElement(m) {
   const ki = m.ki;
   const analyse = ki.analyse;
-  const li = element('li', 'meldung karte');
-
-  const meta = element('div', 'meta');
-  const zeit = element('time', 'zeit', zeitText(m.datum));
-  zeit.dateTime = m.datum;
-  meta.append(
-    zeit,
+  const inhalt = zusammenfassungElement(m);
+  const schlag = chips('Themen', ki.schlagwoerter);
+  if (schlag) inhalt.push(schlag);
+  if (analyse) {
+    for (const [name, werte] of [['Aktien', analyse.betroffen?.aktien], ['ETFs', analyse.betroffen?.etfs], ['Branchen', analyse.betroffen?.branchen]]) {
+      const z = chips(name, werte);
+      if (z) inhalt.push(z);
+    }
+    const box = element('div', 'einschaetzung');
+    const horizont = { kurzfristig: 'kurzfristig', langfristig: 'langfristig', beides: 'kurz- und langfristig' }[analyse.einschaetzung.zeithorizont] || '';
+    box.append(element('div', 'einschaetzung-titel', `KI-Einschätzung · Zeithorizont: ${horizont} · Sicherheit: ${analyse.einschaetzung.sicherheit}`));
+    box.append(element('p', null, analyse.einschaetzung.text));
+    if (analyse.vergleich) box.append(element('p', 'vergleich', `Historischer Vergleich: ${analyse.vergleich}`));
+    box.append(element('div', 'modell', `Analysiert von ${analyse.dienst} (${analyse.modell}) · keine Anlageberatung`));
+    inhalt.push(box);
+  } else {
+    inhalt.push(element('p', 'hinweis', 'Ausführliche KI-Einschätzung folgt beim nächsten Abruf.'));
+  }
+  return aufklappMeldung(m, 'meldung karte', [
+    zeitElement(m),
     element('span', null, m.quelle),
     element('span', 'badge', m.kategorie),
     element('span', 'badge relevanz', `Relevanz ${ki.relevanz}/10`),
     element('span', `stimmung stimmung-${ki.stimmung}`, STIMMUNG[ki.stimmung] || ''),
-  );
-  watchlistBadge(meta, m);
-  li.append(meta);
-  li.append(titelLink(m, anzeigeTitel(m)));
-  const original = originalZeile(m);
-  if (original) li.append(original);
+  ], inhalt);
+}
 
-  const schlag = chips('Themen', ki.schlagwoerter);
-  if (schlag) li.append(schlag);
-
-  if (!analyse) {
-    li.append(element('p', 'hinweis', 'Ausführliche Analyse folgt beim nächsten Abruf.'));
-    return li;
-  }
-
-  const punkte = element('ul', 'punkte');
-  for (const p of analyse.zusammenfassung) punkte.append(element('li', null, p));
-  li.append(punkte);
-
-  for (const [name, werte] of [['Aktien', analyse.betroffen?.aktien], ['ETFs', analyse.betroffen?.etfs], ['Branchen', analyse.betroffen?.branchen]]) {
-    const z = chips(name, werte);
-    if (z) li.append(z);
-  }
-
-  const box = element('div', 'einschaetzung');
-  const horizont = { kurzfristig: 'kurzfristig', langfristig: 'langfristig', beides: 'kurz- und langfristig' }[analyse.einschaetzung.zeithorizont] || '';
-  box.append(element('div', 'einschaetzung-titel', `KI-Einschätzung · Zeithorizont: ${horizont} · Sicherheit: ${analyse.einschaetzung.sicherheit}`));
-  box.append(element('p', null, analyse.einschaetzung.text));
-  if (analyse.vergleich) box.append(element('p', 'vergleich', `Historischer Vergleich: ${analyse.vergleich}`));
-  box.append(element('div', 'modell', `Analysiert von ${analyse.dienst} (${analyse.modell}) · keine Anlageberatung`));
-  li.append(box);
-
-  const weitere = (m.quellen || []).filter((q) => q.name !== m.quelle && sichererLink(q.link));
-  if (weitere.length) li.append(element('div', 'weitere', `Auch bei: ${weitere.map((q) => q.name).join(', ')}`));
-  return li;
+// Springt zur Meldung in der Liste und klappt sie auf.
+function meldungOeffnen(id) {
+  const li = document.getElementById(`meldung-${id}`);
+  if (!li) return;
+  const details = li.querySelector('details');
+  if (details) details.open = true;
+  li.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function standAnzeigen(status) {
@@ -500,7 +527,7 @@ function maerkteAnzeigen(kurse) {
 
 }
 
-// Die 3 wichtigsten Meldungen der letzten 24 Stunden (höchste KI-Relevanz, bei Gleichstand die neueste).
+// Die 3 wichtigsten Meldungen der letzten 24 Stunden aus „Wichtig“ (höchste KI-Relevanz, bei Gleichstand die neueste). Klick springt zur Meldung.
 function topNewsAnzeigen(meldungen) {
   const grenze = Date.now() - 24 * 3600 * 1000;
   const top = meldungen
@@ -510,7 +537,10 @@ function topNewsAnzeigen(meldungen) {
   $('top-news').hidden = top.length === 0;
   $('top-liste').replaceChildren(...top.map((m) => {
     const li = element('li', 'top-eintrag');
-    li.append(titelLink(m, anzeigeTitel(m)));
+    const knopf = element('button', 'titel top-knopf', anzeigeTitel(m));
+    knopf.type = 'button';
+    knopf.addEventListener('click', () => meldungOeffnen(m.id));
+    li.append(knopf);
     const meta = element('div', 'top-meta');
     meta.append(element('span', 'top-relevanz', `Relevanz ${m.ki.relevanz}/10`), ` · ${zeitText(m.datum)} · ${m.quelle}`);
     if (STIMMUNG[m.ki.stimmung]) meta.append(' · ', element('span', `stimmung stimmung-${m.ki.stimmung}`, STIMMUNG[m.ki.stimmung]));
@@ -682,7 +712,6 @@ async function laden() {
 
   const meldungen = Array.isArray(daten.meldungen) ? daten.meldungen : [];
   letzteMeldungen = meldungen;
-  topNewsAnzeigen(meldungen);
   watchlistAnzeigen();
   kurseWatchlistAnzeigen();
   zinsenAnzeigen();
@@ -699,7 +728,11 @@ async function laden() {
   const schwelle = Number(status?.relevanzSchwelle) || 7;
   const wichtig = meldungen.filter((m) => Number(m.ki?.relevanz) >= schwelle && !m.ki.dublette);
   $('liste-wichtig').replaceChildren(...wichtig.map((m) => wichtigElement(m)));
+  topNewsAnzeigen(wichtig);
   $('wichtig-leer').hidden = wichtig.length > 0;
+  $('vorlesen-leiste').hidden = wichtig.length === 0;
+  vorlesenListe = wichtig;
+  vorlesenMarkieren();
   const wichtigNeu = zuletztGesehen ? wichtig.filter((m) => Date.parse(m.ki.bewertetAm) > zuletztGesehen).length : wichtig.length;
   $('zaehler-wichtig').hidden = wichtigNeu === 0;
   $('zaehler-wichtig').textContent = String(wichtigNeu);
@@ -718,6 +751,128 @@ $('tab-termine').addEventListener('click', () => reiterWechseln('termine'));
 $('tab-zinsen').addEventListener('click', () => reiterWechseln('zinsen'));
 zinsenEinrichten();
 watchlistBearbeitenEinrichten();
+
+// ---------- „Lies mir vor“ (Reiter Wichtig) ----------
+// Kostenlos über die Sprachausgabe des Geräts (Web Speech API). Liest jede Meldung von oben nach unten:
+// Überschrift, dann die Stichpunkte, dann die nächste. Jeder Satz ist eine eigene kurze Ansage –
+// so bricht Chrome am PC lange Texte nicht ab, und Pause/Weiter klappt auch auf Android zuverlässig.
+let vorlesenListe = [];
+const vorlesen = { aktiv: false, pausiert: false, meldung: 0, satz: 0, lauf: 0, sperre: null };
+const sprachausgabe = 'speechSynthesis' in window ? window.speechSynthesis : null;
+
+function deutscheStimme() {
+  const deutsch = (sprachausgabe?.getVoices() || []).filter((s) => /^de([-_]|$)/i.test(s.lang));
+  return deutsch.find((s) => /^de[-_]DE$/i.test(s.lang) && /google|natural|online/i.test(s.name))
+    || deutsch.find((s) => /^de[-_]DE$/i.test(s.lang))
+    || deutsch[0] || null;
+}
+
+function saetzeVon(m, nummer, anzahl) {
+  const { punkte, wenigInfo } = stichpunkte(m);
+  const saetze = [`Meldung ${nummer} von ${anzahl}. ${anzeigeTitel(m)}.`];
+  saetze.push(...(punkte.length ? punkte : ['Dazu gibt es noch keine Zusammenfassung.']));
+  if (wenigInfo) saetze.push('Kurzmeldung, die Quelle enthält nur wenige Infos.');
+  return saetze;
+}
+
+function vorlesenMarkieren() {
+  for (const el of document.querySelectorAll('.vorlesen-aktiv')) el.classList.remove('vorlesen-aktiv');
+  const m = vorlesen.aktiv && vorlesenListe[vorlesen.meldung];
+  if (m) document.getElementById(`meldung-${m.id}`)?.classList.add('vorlesen-aktiv');
+}
+
+function vorlesenAnzeigen(text) {
+  $('vorlesen-start').hidden = vorlesen.aktiv;
+  $('vorlesen-pause').hidden = !vorlesen.aktiv;
+  $('vorlesen-stopp').hidden = !vorlesen.aktiv;
+  $('vorlesen-pause').textContent = vorlesen.pausiert ? 'Weiter' : 'Pause';
+  $('vorlesen-status').textContent = vorlesen.aktiv
+    ? `${vorlesen.pausiert ? 'Pausiert' : 'Liest vor'}: Meldung ${vorlesen.meldung + 1} von ${vorlesenListe.length}`
+    : text || '';
+}
+
+// Hält den Bildschirm beim Vorlesen an (sonst stoppt Android die Sprachausgabe beim Sperren).
+async function bildschirmWachHalten(an) {
+  try {
+    if (an && !vorlesen.sperre && navigator.wakeLock) vorlesen.sperre = await navigator.wakeLock.request('screen');
+    if (!an && vorlesen.sperre) { await vorlesen.sperre.release(); vorlesen.sperre = null; }
+  } catch { /* nicht unterstützt – Vorlesen klappt trotzdem */ }
+}
+
+function naechsterSatz() {
+  if (!vorlesen.aktiv || vorlesen.pausiert) return;
+  const m = vorlesenListe[vorlesen.meldung];
+  if (!m) { vorlesenStoppen('Fertig – alle wichtigen Meldungen vorgelesen.'); return; }
+  const saetze = saetzeVon(m, vorlesen.meldung + 1, vorlesenListe.length);
+  if (vorlesen.satz >= saetze.length) {
+    vorlesen.meldung++;
+    vorlesen.satz = 0;
+    naechsterSatz();
+    return;
+  }
+  if (vorlesen.satz === 0) {
+    vorlesenMarkieren();
+    meldungOeffnen(m.id);
+    vorlesenAnzeigen();
+  }
+  const ansage = new SpeechSynthesisUtterance(saetze[vorlesen.satz]);
+  ansage.lang = 'de-DE';
+  const stimme = deutscheStimme();
+  if (stimme) ansage.voice = stimme;
+  const lauf = vorlesen.lauf;
+  // Abgebrochene Ansagen (Pause/Stopp) melden sich auch mit „end“/„error“ – die alte Runde wird ignoriert.
+  ansage.onend = () => { if (lauf === vorlesen.lauf) { vorlesen.satz++; naechsterSatz(); } };
+  ansage.onerror = (e) => {
+    if (lauf !== vorlesen.lauf || e.error === 'interrupted' || e.error === 'canceled') return;
+    vorlesenStoppen('Vorlesen nicht möglich – bitte Lautstärke und Sprachausgabe des Geräts prüfen.');
+  };
+  sprachausgabe.speak(ansage);
+}
+
+function vorlesenStarten() {
+  if (!sprachausgabe || !vorlesenListe.length) return;
+  sprachausgabe.cancel();
+  Object.assign(vorlesen, { aktiv: true, pausiert: false, meldung: 0, satz: 0, lauf: vorlesen.lauf + 1 });
+  bildschirmWachHalten(true);
+  if (!deutscheStimme()) kurzerHinweis('Keine deutsche Stimme gefunden – es liest die Standardstimme. Windows 10: Einstellungen → Zeit und Sprache → Sprache → Deutsch → Optionen → Sprachausgabe.');
+  naechsterSatz();
+}
+
+// Pause bricht die aktuelle Ansage ab; „Weiter“ wiederholt den angefangenen Stichpunkt.
+function vorlesenPause() {
+  if (!vorlesen.aktiv) return;
+  vorlesen.pausiert = !vorlesen.pausiert;
+  vorlesen.lauf++;
+  sprachausgabe.cancel();
+  vorlesenAnzeigen();
+  naechsterSatz();
+}
+
+function vorlesenStoppen(text = '') {
+  Object.assign(vorlesen, { aktiv: false, pausiert: false, lauf: vorlesen.lauf + 1 });
+  sprachausgabe?.cancel();
+  bildschirmWachHalten(false);
+  vorlesenMarkieren();
+  vorlesenAnzeigen(text);
+}
+
+function vorlesenEinrichten() {
+  if (!sprachausgabe) {
+    $('vorlesen-start').disabled = true;
+    $('vorlesen-status').textContent = 'Dieser Browser kann nicht vorlesen.';
+    return;
+  }
+  sprachausgabe.getVoices(); // Chrome lädt die Stimmen erst beim ersten Abruf
+  $('vorlesen-start').addEventListener('click', vorlesenStarten);
+  $('vorlesen-pause').addEventListener('click', vorlesenPause);
+  $('vorlesen-stopp').addEventListener('click', () => vorlesenStoppen('Gestoppt.'));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && vorlesen.aktiv) bildschirmWachHalten(true);
+  });
+}
+
+
+vorlesenEinrichten();
 
 // ---------- Knopf „App-Link“ – nur auf dem Gerät des Besitzers ----------
 // Einmal öffnen mit …/KI-Finanz-Radar/#besitzer=CODE schaltet den Knopf auf diesem Gerät frei.

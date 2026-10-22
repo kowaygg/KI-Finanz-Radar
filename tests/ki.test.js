@@ -218,3 +218,17 @@ test('Bewertung: Art und Themenbezug; Ratgeber/ohne Marktbezug höchstens Releva
   assert.equal(r.get('b').passt, true);
   assert.equal(r.get('b').relevanz, 7);
 });
+
+test('Bewertung: bis zu 5 Stichpunkte, zu wenig Stoff wird als Kurzmeldung markiert', () => {
+  const basis = { relevanz: 5, kategorie: 'Börse', stimmung: 'neutral', art: 'nachricht', passt: true };
+  const ergebnis = bewertungenPruefen({
+    bewertungen: [
+      { ...basis, id: 'a', kurz: ['1', '2', '3', '4', '5', '6'], wenigInfo: false },
+      { ...basis, id: 'b', kurz: ['Nur ein Punkt'] },
+    ],
+  }, ids);
+  assert.equal(ergebnis.get('a').kurz.length, 5);
+  assert.equal(ergebnis.get('a').wenigInfo, false);
+  assert.deepEqual(ergebnis.get('b').kurz, ['Nur ein Punkt']);
+  assert.equal(ergebnis.get('b').wenigInfo, true);
+});

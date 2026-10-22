@@ -41,3 +41,11 @@ test('Kaputte Eingaben führen nicht zum Absturz', () => {
   assert.deepEqual(feedLesen(undefined), []);
   assert.deepEqual(feedLesen('<rss><item><title>x'), []);
 });
+
+test('Teaser: der längere Feed-Text (z. B. content:encoded) gewinnt, höchstens 1000 Zeichen', () => {
+  const lang = 'Wort '.repeat(400);
+  const xml = `<rss><channel><item><title>T</title><link>https://example.com/l</link>
+<description>Kurz.</description><content:encoded><![CDATA[<p>${lang}</p>]]></content:encoded></item></channel></rss>`;
+  const [e] = feedLesen(xml);
+  assert.ok(e.teaser.length > 900 && e.teaser.length <= 1000);
+});

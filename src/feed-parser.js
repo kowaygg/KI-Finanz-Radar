@@ -3,6 +3,9 @@
 
 import { reinerText, sichererLink } from './bereinigen.js';
 
+// So viel Feed-Text bekommt die KI höchstens pro Meldung (Grundlage für die 5 Stichpunkte).
+const TEASER_MAX = 1000;
+
 function feld(block, ...namen) {
   for (const name of namen) {
     const treffer = block.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, 'i'));
@@ -44,7 +47,10 @@ export function feedLesen(xml) {
       titel,
       link,
       datum: datumLesen(feld(block, 'pubDate', 'published', 'updated', 'dc:date')),
-      teaser: reinerText(feld(block, 'description', 'summary', 'content:encoded', 'content'), 400),
+      // Längster vorhandener Text (Beschreibung oder Feed-Volltext), gekürzt – nur interne KI-Eingabe, nie angezeigt.
+      teaser: ['description', 'summary', 'content:encoded', 'content']
+        .map((name) => reinerText(feld(block, name), TEASER_MAX))
+        .reduce((a, b) => (b.length > a.length ? b : a), ''),
     });
   }
   return eintraege;

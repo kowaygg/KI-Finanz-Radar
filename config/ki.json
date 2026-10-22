@@ -31,9 +31,9 @@
       "modelle": ["openai/gpt-oss-120b:free", "openrouter/free"]
     }
   ],
-  "meldungenProBewertung": 25,
+  "meldungenProBewertung": 15,
   "meldungenProAnalyse": 5,
-  "maxBewertungsAnfragenProLauf": 4,
+  "maxBewertungsAnfragenProLauf": 6,
   "maxAnalyseAnfragenProLauf": 4,
   "titelProUebersetzung": 50,
   "timeoutSekunden": 90

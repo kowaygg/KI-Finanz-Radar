@@ -42,6 +42,9 @@ export function bewertungenPruefen(antwort, erlaubteIds) {
       stimmung,
       clickbait,
       geruecht,
+      // Bis zu 5 Stichpunkte für die aufklappbare Meldung; zu wenig Stoff in der Quelle wird ehrlich markiert.
+      kurz: liste(b.kurz, 5, 240),
+      wenigInfo: b.wenigInfo === true || liste(b.kurz, 5, 240).length < 3,
       titelDe: text(b.titelDe, 300) || null,
       ereignis: typeof b.ereignis === 'string' ? b.ereignis.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').slice(0, 60) || null : null,
     });

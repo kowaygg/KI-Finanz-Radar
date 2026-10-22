@@ -33,19 +33,23 @@ AUFGABE: Bewerte jede Meldung.
   unterhaltung = Lifestyle, Kurioses, Geschichten ohne Marktbezug, Gesundheit, Reisen, Sport, Promis
 - passt: true nur, wenn es um Wirtschaft, Börse, Unternehmen, KI/Tech-Branche, Zentralbanken, Konjunktur, Politik mit klarer Marktwirkung oder Finanzen & Vorsorge geht
   (Finanzen & Vorsorge = Banken, Broker, Finanzaufsicht, Steuern auf Kapitalerträge, Rente/Altersvorsorge, staatliche Förderung wie Altersvorsorgedepot oder Frühstart-Rente, neue Finanzgesetze); sonst false
+- kurz: NUR wenn passt=true, clickbait=false und relevanz ≥ 3 – sonst leere Liste []. Bis zu 5 kurze Stichpunkte auf Deutsch (je höchstens 20 Wörter): das Wichtigste, was ein Anleger zu dieser Meldung wissen sollte (Was ist passiert? Wer? Zahlen? Warum wichtig?).
+  Verwende AUSSCHLIESSLICH Fakten aus "titel" und "auszug". Nichts ergänzen, nichts aus eigenem Wissen, keine Vermutungen. Wiederhole nicht einfach die Überschrift.
+  Gibt der Auszug weniger her, schreibe weniger Punkte (mindestens 1) und setze wenigInfo: true.
+- wenigInfo: true, wenn Titel und Auszug für 3 oder mehr inhaltliche Stichpunkte nicht reichen; sonst false
 - titelDe: NUR bei Meldungen mit "sprache":"en" – sachliche deutsche Übersetzung der Überschrift; bei deutschen Meldungen weglassen
 - ereignis: kurzes Kürzel für das konkrete Ereignis, nur Kleinbuchstaben, Ziffern und Bindestriche (z. B. "tesla-spacex-fusion", "ezb-zinsentscheid-oktober").
   Meldungen über DASSELBE Ereignis (auch in verschiedenen Sprachen oder Formulierungen) bekommen dasselbe Kürzel.
   Passt eine Meldung zu einem Kürzel aus "bekannteEreignisse", verwende genau dieses Kürzel.
 
-FORMAT: {"bewertungen":[{"id":"…","relevanz":7,"kategorie":"Börse","schlagwoerter":["…"],"stimmung":"neutral","clickbait":false,"geruecht":false,"art":"nachricht","passt":true,"titelDe":"…","ereignis":"…"}]}
+FORMAT: {"bewertungen":[{"id":"…","relevanz":7,"kategorie":"Börse","schlagwoerter":["…"],"stimmung":"neutral","clickbait":false,"geruecht":false,"art":"nachricht","passt":true,"kurz":["…"],"wenigInfo":false,"titelDe":"…","ereignis":"…"}]}
 Gib für JEDE übergebene id genau einen Eintrag zurück.`;
 
 export const ANALYSIEREN = `${GRUNDREGELN}
 
 AUFGABE: Analysiere jede wichtige Meldung ausführlich.
 - titel: deutsche Überschrift (übersetzen, falls englisch; sachlich, ohne Übertreibung)
-- zusammenfassung: 3–5 kurze Stichpunkte auf Deutsch – nur was in der Meldung steht
+- zusammenfassung: 5 kurze Stichpunkte auf Deutsch (das Wichtigste, was ein Anleger wissen sollte) – nur was in der Meldung steht; gibt sie weniger her, dann weniger (mindestens 2)
 - betroffen: {"aktien":[…],"etfs":[…],"branchen":[…]} – konkrete Namen, nur wenn plausibel betroffen; sonst leere Liste. ETFs als Art/Index (z. B. "MSCI World", "Halbleiter-ETFs")
 - einschaetzung: {"text":"2–4 Sätze zu möglichen Auswirkungen auf Märkte, Branchen, Aktien","zeithorizont":eine aus ${JSON.stringify(ZEITHORIZONTE)},"sicherheit":eine aus ${JSON.stringify(SICHERHEITEN)}}
 - vergleich: historischer Vergleich NUR wenn gut belegt und allgemein bekannt, sonst null. Lieber weglassen als raten.

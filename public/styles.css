@@ -295,3 +295,26 @@ main { padding-bottom: 8px; }
 .knopf-klein { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font: inherit; font-size: 0.82rem; border: 1px solid var(--rand); border-radius: 8px; cursor: pointer; }
 .knopf-klein .ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .hinweis-kurz { margin: 8px 0 0; padding: 6px 10px; border: 1px solid var(--akzent); border-radius: 8px; background: var(--flaeche-hoch); font-size: 0.85rem; word-break: break-all; }
+
+/* Aufklappbare Meldungen: Klick zeigt zuerst die KI-Stichpunkte, der Link zur Quelle steht darunter */
+.aufklapp > summary { list-style: none; cursor: pointer; }
+.aufklapp > summary::-webkit-details-marker { display: none; }
+.aufklapp-kopf { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.aufklapp-kopf .titel { flex: 1; }
+.pfeil { color: var(--text-leise); margin-top: 4px; transition: transform 0.15s; }
+.aufklapp[open] .pfeil { transform: rotate(90deg); color: var(--akzent); }
+.aufklapp > summary:hover .titel { color: var(--akzent); }
+.aufklapp-inhalt { border-top: 1px solid var(--linie); margin-top: 8px; padding-top: 4px; }
+.kurzmeldung { margin: 0 0 8px; padding: 4px 8px; border-left: 3px solid var(--akzent); background: var(--flaeche-hoch); font-size: 0.85rem; }
+.quelle-zeile { font-size: 0.85rem; margin-top: 8px; }
+.quelle-zeile a { color: var(--akzent); }
+.top-knopf { background: none; border: 0; padding: 0; color: var(--text); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.top-knopf:hover, .top-knopf:focus-visible { color: var(--top-akzent); text-decoration: underline; }
+#ansicht-wichtig .top-news { margin: 0 0 12px; }
+
+/* „Lies mir vor“ – nur im Reiter Wichtig */
+.vorlesen-leiste { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; }
+.vorlesen-leiste .knopf { display: inline-flex; align-items: center; gap: 6px; }
+.vorlesen-leiste .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.meldung { scroll-margin-top: 12px; }
+.vorlesen-aktiv { outline: 3px solid var(--akzent); outline-offset: 2px; }

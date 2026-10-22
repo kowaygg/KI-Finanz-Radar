@@ -39,10 +39,6 @@
       <span id="kopf-wichtig" class="kopf-wichtig" hidden></span>
     </div>
     <p id="warnung" class="warnung" hidden></p>
-    <section id="top-news" class="top-news" aria-labelledby="top-titel" hidden>
-      <h2 id="top-titel">Top-News der letzten 24 Stunden</h2>
-      <ol id="top-liste" class="top-liste"></ol>
-    </section>
   </header>
 
   <nav class="reiter" role="tablist" aria-label="Ansicht">
@@ -63,6 +59,16 @@
       <ol id="liste-ticker" class="liste"></ol>
     </section>
     <section id="ansicht-wichtig" role="tabpanel" aria-labelledby="tab-wichtig" hidden>
+      <section id="top-news" class="top-news" aria-labelledby="top-titel" hidden>
+        <h2 id="top-titel">Top-News der letzten 24 Stunden</h2>
+        <ol id="top-liste" class="top-liste"></ol>
+      </section>
+      <div id="vorlesen-leiste" class="vorlesen-leiste">
+        <button type="button" id="vorlesen-start" class="knopf"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span>Lies mir vor</span></button>
+        <button type="button" id="vorlesen-pause" class="knopf knopf-leise" hidden>Pause</button>
+        <button type="button" id="vorlesen-stopp" class="knopf knopf-leise" hidden>Stopp</button>
+        <span id="vorlesen-status" class="klein-hinweis" role="status"></span>
+      </div>
       <ol id="liste-wichtig" class="liste"></ol>
       <p id="wichtig-leer" class="leer" hidden>Noch keine wichtigen Meldungen. Die KI bewertet neue Meldungen bei jedem Abruf.</p>
     </section>
