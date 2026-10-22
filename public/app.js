@@ -760,11 +760,54 @@ let vorlesenListe = [];
 const vorlesen = { aktiv: false, pausiert: false, meldung: 0, satz: 0, lauf: 0, sperre: null };
 const sprachausgabe = 'speechSynthesis' in window ? window.speechSynthesis : null;
 
+// Stimme, Tonhöhe und Tempo wählt jeder auf seinem Gerät selbst (gespeichert nur lokal).
+// Voreinstellung: eine männliche deutsche Stimme, etwas tiefer gestellt.
+const SPEICHER_STIMME = 'radar.stimme';
+const MAENNLICH = /stefan|conrad|killian|florian|kasper|ralf|bernd|christoph|jonas|markus|yannick|thorsten|männlich|maennlich|male|mann/i;
+const stimmEinstellung = { name: '', tonhoehe: 0.8, tempo: 0.95 };
+try { Object.assign(stimmEinstellung, JSON.parse(speicherLesen(SPEICHER_STIMME) || '{}')); } catch { /* Standard */ }
+
+function deutscheStimmen() {
+  return (sprachausgabe?.getVoices() || []).filter((s) => /^de([-_]|$)/i.test(s.lang));
+}
+
 function deutscheStimme() {
-  const deutsch = (sprachausgabe?.getVoices() || []).filter((s) => /^de([-_]|$)/i.test(s.lang));
-  return deutsch.find((s) => /^de[-_]DE$/i.test(s.lang) && /google|natural|online/i.test(s.name))
+  const deutsch = deutscheStimmen();
+  return deutsch.find((s) => s.name === stimmEinstellung.name)
+    || deutsch.find((s) => MAENNLICH.test(s.name))
     || deutsch.find((s) => /^de[-_]DE$/i.test(s.lang))
     || deutsch[0] || null;
+}
+
+function stimmenListeAnzeigen() {
+  const auswahl = $('stimme-wahl');
+  const stimmen = deutscheStimmen();
+  const aktiv = deutscheStimme();
+  auswahl.replaceChildren(...stimmen.map((s) => {
+    const o = element('option', null, `${s.name}${MAENNLICH.test(s.name) ? ' (männlich)' : ''}`);
+    o.value = s.name;
+    o.selected = s === aktiv;
+    return o;
+  }));
+  if (!stimmen.length) auswahl.append(element('option', null, 'Gerätestimme (keine Auswahl möglich)'));
+  $('stimme-hinweis').hidden = stimmen.length > 1;
+}
+
+function stimmeSpeichern() {
+  stimmEinstellung.name = $('stimme-wahl').value || '';
+  stimmEinstellung.tonhoehe = Number($('stimme-tonhoehe').value);
+  stimmEinstellung.tempo = Number($('stimme-tempo').value);
+  speicherSchreiben(SPEICHER_STIMME, JSON.stringify(stimmEinstellung));
+}
+
+function ansageErstellen(text) {
+  const ansage = new SpeechSynthesisUtterance(text);
+  ansage.lang = 'de-DE';
+  const stimme = deutscheStimme();
+  if (stimme) ansage.voice = stimme;
+  ansage.pitch = stimmEinstellung.tonhoehe;
+  ansage.rate = stimmEinstellung.tempo;
+  return ansage;
 }
 
 function saetzeVon(m, nummer, anzahl) {
@@ -815,10 +858,7 @@ function naechsterSatz() {
     meldungOeffnen(m.id);
     vorlesenAnzeigen();
   }
-  const ansage = new SpeechSynthesisUtterance(saetze[vorlesen.satz]);
-  ansage.lang = 'de-DE';
-  const stimme = deutscheStimme();
-  if (stimme) ansage.voice = stimme;
+  const ansage = ansageErstellen(saetze[vorlesen.satz]);
   const lauf = vorlesen.lauf;
   // Abgebrochene Ansagen (Pause/Stopp) melden sich auch mit „end“/„error“ – die alte Runde wird ignoriert.
   ansage.onend = () => { if (lauf === vorlesen.lauf) { vorlesen.satz++; naechsterSatz(); } };
@@ -862,7 +902,18 @@ function vorlesenEinrichten() {
     $('vorlesen-status').textContent = 'Dieser Browser kann nicht vorlesen.';
     return;
   }
-  sprachausgabe.getVoices(); // Chrome lädt die Stimmen erst beim ersten Abruf
+  // Chrome lädt die Stimmen erst nach und nach – Liste bei jeder Änderung neu aufbauen.
+  stimmenListeAnzeigen();
+  sprachausgabe.addEventListener?.('voiceschanged', stimmenListeAnzeigen);
+  $('stimme-tonhoehe').value = String(stimmEinstellung.tonhoehe);
+  $('stimme-tempo').value = String(stimmEinstellung.tempo);
+  for (const id of ['stimme-wahl', 'stimme-tonhoehe', 'stimme-tempo']) $(id).addEventListener('change', stimmeSpeichern);
+  $('stimme-probe').addEventListener('click', () => {
+    stimmeSpeichern();
+    if (vorlesen.aktiv) vorlesenStoppen();
+    sprachausgabe.cancel();
+    sprachausgabe.speak(ansageErstellen('Guten Abend. Hier sind die wichtigsten Meldungen aus Wirtschaft und Börse.'));
+  });
   $('vorlesen-start').addEventListener('click', vorlesenStarten);
   $('vorlesen-pause').addEventListener('click', vorlesenPause);
   $('vorlesen-stopp').addEventListener('click', () => vorlesenStoppen('Gestoppt.'));
